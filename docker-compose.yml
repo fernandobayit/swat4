@@ -19,6 +19,8 @@ services:
       - samba-etc:/etc/samba
       - samba-logs:/var/log/samba
       - swat4-shares:/mnt/data
+      - samba-netbird-etc:/etc/netbird
+      - samba-netbird-state:/var/lib/netbird
     ports:
       - "389:389"
       - "636:636"
@@ -83,6 +85,8 @@ volumes:
   samba-logs:
   swat4-data:
   swat4-shares:
+  samba-netbird-etc:
+  samba-netbird-state:
 
 networks:
   swat-net:
