@@ -1,11 +1,14 @@
-# Dev stack. NOTE: the samba-dc service comes from the separate
-# samba-ad-fs project — clone it at ./samba-dc to run it locally.
-# (Or use docker-compose.prod.yml against a host Samba AD DC.)
+# Dev stack com imagens hospedadas no GitHub Container Registry.
+# Para desenvolvimento local de cada serviço, troque o `image:` pelo
+# `build:` correspondente (opções comentadas em cada serviço).
 services:
   samba-dc:
-    build:
-      context: ./samba-dc
-      dockerfile: Dockerfile
+    image: ghcr.io/fernandobayit/samba-ad-fs:latest
+    pull_policy: always
+    # Dev: build local a partir do projeto samba-ad-fs clonado em ./samba-dc
+    # build:
+    #   context: ./samba-dc
+    #   dockerfile: Dockerfile
     container_name: swat4-samba-dc
     hostname: dc1
     domainname: swat.local
@@ -41,9 +44,12 @@ services:
         ipv4_address: 172.20.0.10
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/fernandobayit/swat4-backend:latest
+    pull_policy: always
+    # Dev: build local
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
     container_name: swat4-backend
     env_file:
       - .env
@@ -63,9 +69,12 @@ services:
 
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/fernandobayit/swat4-frontend:latest
+    pull_policy: always
+    # Dev: build local
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
     container_name: swat4-frontend
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
