@@ -99,7 +99,7 @@ git commit -m "feat: compose base multi-topologia (modo AD no host)"
 
 services:
   backend:
-    extra_hosts: []
+    extra_hosts: !reset null
     environment:
       SAMBA_DC_HOST: ${SAMBA_DC_HOST:-samba-ad-dc1}
       LDAP_URL: ${LDAP_URL:-ldap://samba-ad-dc1:389}
