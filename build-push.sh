@@ -10,11 +10,13 @@
 #    ./build-push.sh registry.example.com/swat4 v1.0.0
 #    ./build-push.sh ghcr.io/myorg/swat4 latest
 #
-#  After pushing, on the production host:
-#    1. Copy .env.prod.example to .env and edit values
+#  After pushing, on the target host:
+#    1. Adjust the image names in docker-compose.yml (and docker-compose.dc.yml,
+#       if the DC is the containerized samba-ad-fs stack) to <registry>-backend /
+#       <registry>-frontend, or export REGISTRY-style vars you added
 #    2. docker login <registry>
-#    3. REGISTRY=<registry> TAG=<tag> docker compose -f docker-compose.prod.yml pull
-#    4. REGISTRY=<registry> TAG=<tag> docker compose -f docker-compose.prod.yml up -d
+#    3. docker compose pull (ou docker compose -f docker-compose.yml -f docker-compose.dc.yml pull)
+#    4. docker compose up -d (ou -f docker-compose.yml -f docker-compose.dc.yml up -d)
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
