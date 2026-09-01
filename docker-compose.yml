@@ -1,105 +1,49 @@
-# Dev stack com imagens hospedadas no GitHub Container Registry.
-# Para desenvolvimento local de cada serviço, troque o `image:` pelo
-# `build:` correspondente (opções comentadas em cada serviço).
-services:
-  samba-dc:
-    image: ghcr.io/fernandobayit/samba-ad-fs:latest
-    pull_policy: always
-    # Dev: build local a partir do projeto samba-ad-fs clonado em ./samba-dc
-    # build:
-    #   context: ./samba-dc
-    #   dockerfile: Dockerfile
-    container_name: swat4-samba-dc
-    hostname: dc1
-    domainname: swat.local
-    privileged: true
-    devices:
-      - /dev/net/tun
-    env_file:
-      - .env
-    volumes:
-      - samba-data:/var/lib/samba
-      - samba-etc:/etc/samba
-      - samba-logs:/var/log/samba
-      - swat4-shares:/mnt/data
-      - samba-netbird-etc:/etc/netbird
-      - samba-netbird-state:/var/lib/netbird
-    ports:
-      - "389:389"
-      - "636:636"
-      - "445:445"
-      - "88:88"
-      - "464:464"
-      - "3268:3268"
-      - "3269:3269"
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "samba-tool", "processes", "--configfile=/etc/samba/smb.conf" ]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
-    networks:
-      swat-net:
-        ipv4_address: 172.20.0.10
+# SWAT4 — Samba 4 Web Administration Tool
+# Modo padrao: Samba AD rodando no proprio host.
+# Se o seu DC e containerizado (projeto samba-ad-fs), use o override:
+#   docker compose -f docker-compose.yml -f docker-compose.dc.yml up -d
+# Preencha as variaveis abaixo (ou export no shell). Nunca commite valores reais.
 
+services:
   backend:
     image: ghcr.io/fernandobayit/swat4-backend:latest
     pull_policy: always
-    # Dev: build local
-    # build:
-    #   context: ./backend
-    #   dockerfile: Dockerfile
     container_name: swat4-backend
-    env_file:
-      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SAMBA_DC_HOST: ${SAMBA_DC_HOST:-host.docker.internal}
+      SAMBA_REALM: ${SAMBA_REALM:-SWAT.LOCAL}
+      SAMBA_DOMAIN: ${SAMBA_DOMAIN:-SWAT}
+      SAMBA_BASE_DN: ${SAMBA_BASE_DN:-DC=swat,DC=local}
+      LDAP_URL: ${LDAP_URL:-ldap://host.docker.internal:389}
+      SAMBA_ADMIN_USER: ${SAMBA_ADMIN_USER:-administrator}
+      SAMBA_ADMIN_PASSWORD: ${SAMBA_ADMIN_PASSWORD:-ChangeThisPassword}
+      JWT_SECRET: ${JWT_SECRET:-change-this-jwt-secret}
+      ALLOWED_LOGIN_GROUPS: ${ALLOWED_LOGIN_GROUPS:-Domain Admins,Account Operators}
+      SAMBA_LOG_PATH: /var/log/samba
+      TZ: ${TZ:-America/Sao_Paulo}
     volumes:
-      - samba-logs:/var/log/samba:ro
-      - samba-etc:/etc/samba
+      - /etc/samba:/etc/samba
+      - /var/log/samba:/var/log/samba:ro
+      - /mnt/data:/mnt/data
       - swat4-data:/app/data
-      - swat4-shares:/mnt/data
     ports:
       - "8000:8000"
-    depends_on:
-      samba-dc:
-        condition: service_healthy
     restart: unless-stopped
-    networks:
-      swat-net:
-
 
   frontend:
     image: ghcr.io/fernandobayit/swat4-frontend:latest
     pull_policy: always
-    # Dev: build local
-    # build:
-    #   context: ./frontend
-    #   dockerfile: Dockerfile
     container_name: swat4-frontend
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=${SWAT4_API_URL:-http://localhost:8000}
       - API_URL=http://backend:8000
     ports:
       - "3000:3000"
     depends_on:
       - backend
     restart: unless-stopped
-    networks:
-      swat-net:
-
 
 volumes:
-  samba-data:
-  samba-etc:
-  samba-logs:
   swat4-data:
-  swat4-shares:
-  samba-netbird-etc:
-  samba-netbird-state:
-
-networks:
-  swat-net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
