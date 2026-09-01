@@ -1,0 +1,49 @@
+# SWAT4 — override para DC containerizado (projeto samba-ad-fs no mesmo host).
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.dc.yml up -d
+# Pre-requisito: o stack do DC ja deve estar rodando:
+#   (no diretorio do samba-ad-fs) docker compose up -d
+# Se o DC vive em outro diretorio/projeto, defina SAMBA_DC_COMPOSE_PROJECT.
+
+services:
+  backend:
+    extra_hosts: !reset null
+    environment:
+      SAMBA_DC_HOST: ${SAMBA_DC_HOST:-samba-ad-dc1}
+      LDAP_URL: ${LDAP_URL:-ldap://samba-ad-dc1:389}
+    volumes:
+      - type: volume
+        source: samba-config
+        target: /etc/samba
+      - type: volume
+        source: samba-logs
+        target: /var/log/samba
+        read_only: true
+      - type: volume
+        source: samba-shares
+        target: /mnt/data
+      - swat4-data:/app/data
+    networks:
+      - default
+      - swat-net
+
+  frontend:
+    networks:
+      - default
+      - swat-net
+
+volumes:
+  samba-config:
+    external: true
+    name: ${SAMBA_DC_COMPOSE_PROJECT:-samba-ad-fs}_samba-config
+  samba-logs:
+    external: true
+    name: ${SAMBA_DC_COMPOSE_PROJECT:-samba-ad-fs}_samba-logs
+  samba-shares:
+    external: true
+    name: ${SAMBA_DC_COMPOSE_PROJECT:-samba-ad-fs}_samba-shares
+
+networks:
+  swat-net:
+    name: swat-net
+    driver: bridge
