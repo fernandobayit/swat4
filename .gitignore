@@ -1,0 +1,50 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# SQLite data (local dev)
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary scripts
+tmp_*.py
+
+# Samba AD DC project (lives in its own repo: samba-ad-fs)
+# Clone it into ./samba-dc when running the dev compose stack
+samba-dc/
+samba-init/

@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Urbanist:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #0ABF16;
+  --primary-dark: #027333;
+  --primary-light: #C7FF9B;
+  --accent: #262626;
+  --surface: #F5F5F5;
+  --border: #D9D9D9;
+  --gradient-start: #C7FF9B;
+  --gradient-end: #FFF6A7;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Lexend', 'Urbanist', system-ui, sans-serif;
+  background-color: var(--surface);
+  color: var(--accent);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #BFBFBF;
+}
+
+/* Glass effect utility */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Gradient CTA */
+.gradient-cta {
+  background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+}
+
+/* Pulse animation for active items */
+@keyframes pulse-green {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(10, 191, 22, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(10, 191, 22, 0);
+  }
+}
+
+.pulse-green {
+  animation: pulse-green 2s infinite;
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Log viewer */
+.log-line {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.log-line:hover {
+  background-color: rgba(10, 191, 22, 0.05);
+}
+
+/* OU Tree */
+.ou-tree-node {
+  transition: all 0.15s ease;
+}
+
+.ou-tree-node:hover {
+  background-color: rgba(10, 191, 22, 0.06);
+}
+
+.ou-tree-node.active {
+  background-color: rgba(10, 191, 22, 0.12);
+  border-left: 3px solid var(--primary);
+}

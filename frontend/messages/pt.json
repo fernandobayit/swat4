@@ -1,0 +1,196 @@
+{
+    "common": {
+        "appName": "SWAT4",
+        "appSubtitle": "Samba 4 Web Administration Tool",
+        "loading": "Carregando...",
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "delete": "Excluir",
+        "edit": "Editar",
+        "create": "Criar",
+        "add": "Adicionar",
+        "close": "Fechar",
+        "search": "Buscar",
+        "filter": "Filtrar",
+        "actions": "Ações",
+        "confirm": "Confirmar",
+        "confirmDelete": "Tem certeza que deseja excluir?",
+        "success": "Operação realizada com sucesso",
+        "error": "Ocorreu um erro",
+        "noData": "Nenhum dado encontrado",
+        "yes": "Sim",
+        "no": "Não",
+        "back": "Voltar",
+        "refresh": "Atualizar",
+        "enabled": "Ativado",
+        "disabled": "Desativado",
+        "name": "Nome",
+        "description": "Descrição",
+        "status": "Status",
+        "type": "Tipo",
+        "path": "Caminho",
+        "members": "Membros",
+        "details": "Detalhes",
+        "bulkImport": "Importação em Massa",
+        "uploadCSV": "Carregar CSV",
+        "downloadTemplate": "Baixar Template CSV"
+    },
+    "auth": {
+        "login": "Entrar",
+        "logout": "Sair",
+        "username": "Usuário",
+        "password": "Senha",
+        "loginTitle": "Acesse o Painel",
+        "loginSubtitle": "Autentique-se com suas credenciais do domínio",
+        "invalidCredentials": "Usuário ou senha inválidos",
+        "notAuthorized": "Usuário não autorizado. Verifique o grupo de acesso.",
+        "sessionExpired": "Sessão expirada. Faça login novamente."
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "users": "Usuários",
+        "groups": "Grupos",
+        "shares": "Compartilhamentos",
+        "logs": "Logs",
+        "dns": "DNS",
+        "activity": "Atividades",
+        "settings": "Configurações"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "welcome": "Bem-vindo ao SWAT4",
+        "totalUsers": "Total de Usuários",
+        "totalGroups": "Total de Grupos",
+        "totalShares": "Total de Compartilhamentos"
+    },
+    "users": {
+        "title": "Gerenciamento de Usuários",
+        "addUser": "Novo Usuário",
+        "editUser": "Editar Usuário",
+        "deleteUser": "Excluir Usuário",
+        "username": "Nome de Usuário",
+        "firstName": "Nome",
+        "lastName": "Sobrenome",
+        "displayName": "Nome de Exibição",
+        "email": "E-mail",
+        "password": "Senha",
+        "confirmPassword": "Confirmar Senha",
+        "ou": "Unidade Organizacional",
+        "memberOf": "Membro de",
+        "accountEnabled": "Conta Ativada",
+        "createdAt": "Criado em",
+        "resetPassword": "Redefinir Senha",
+        "enableAccount": "Ativar Conta",
+        "disableAccount": "Desativar Conta"
+    },
+    "groups": {
+        "title": "Gerenciamento de Grupos",
+        "addGroup": "Novo Grupo",
+        "editGroup": "Editar Grupo",
+        "deleteGroup": "Excluir Grupo",
+        "groupName": "Nome do Grupo",
+        "groupType": "Tipo do Grupo",
+        "security": "Segurança",
+        "distribution": "Distribuição",
+        "addMembers": "Adicionar Membros",
+        "removeMembers": "Remover Membros",
+        "memberCount": "Nº de Membros",
+        "members": "Membros",
+        "addMemberPlaceholder": "Digitar nome do usuário para adicionar...",
+        "noUsersFound": "Nenhum usuário encontrado",
+        "noMembers": "Este grupo não possui membros",
+        "removeMember": "Remover membro"
+    },
+    "shares": {
+        "title": "Gerenciamento de Compartilhamentos",
+        "addShare": "Novo Compartilhamento",
+        "editShare": "Editar Compartilhamento",
+        "deleteShare": "Excluir Compartilhamento",
+        "shareName": "Nome do Compartilhamento",
+        "sharePath": "Caminho",
+        "comment": "Comentário",
+        "readOnly": "Somente Leitura",
+        "browseable": "Navegável",
+        "guestAccess": "Acesso de Convidado",
+        "validUsers": "Usuários Válidos",
+        "writeList": "Lista de Escrita"
+    },
+    "logs": {
+        "title": "Visualizador de Logs",
+        "selectFile": "Selecionar Arquivo de Log",
+        "lines": "Linhas",
+        "level": "Nível",
+        "source": "Origem",
+        "message": "Mensagem",
+        "timestamp": "Data/Hora",
+        "autoRefresh": "Auto-Atualização",
+        "noLogs": "Nenhum log encontrado"
+    },
+    "ouTree": {
+        "title": "Unidades Organizacionais",
+        "rootDomain": "Domínio Raiz",
+        "expand": "Expandir",
+        "collapse": "Recolher",
+        "allItems": "Todos os Itens"
+    },
+    "settings": {
+        "title": "Configurações Globais",
+        "passwordPolicy": "Políticas de Senha do Domínio",
+        "complexity": "Exigir Complexidade de Senha",
+        "storePlaintext": "Armazenar Senhas em Texto Claro",
+        "historyLength": "Histórico de Senhas (Lembradas)",
+        "minPwdLength": "Tamanho Mínimo da Senha",
+        "minPwdAge": "Idade Mínima da Senha (Dias)",
+        "maxPwdAge": "Idade Máxima da Senha (Dias)",
+        "lockoutDuration": "Duração do Bloqueio de Conta (Minutos)",
+        "lockoutThreshold": "Limite de Tentativas de Bloqueio",
+        "resetLockout": "Zerar Bloqueio Após (Minutos)",
+        "subtitle": "Configurar opções de todo o domínio",
+        "complexitySubtitle": "Requer letras maiúsculas, minúsculas, números e símbolos.",
+        "neverLockout": "0 significa sem limite de bloqueio"
+    },
+    "dns": {
+        "title": "Gerenciamento de DNS",
+        "subtitle": "Gerenciar Zonas e Registros DNS do AD",
+        "refreshZones": "Atualizar Zonas",
+        "noZones": "Nenhuma Zona Encontrada",
+        "noZonesHelper": "Nenhuma zona DNS foi descoberta no servidor ou você não tem as permissões necessárias.",
+        "primary": "Primária",
+        "integratedZone": "Zona Integrada ao Diretório",
+        "records": "Registros:",
+        "manage": "Gerenciar →"
+    },
+    "help": {
+        "title": "Centro de Ajuda",
+        "subtitle": "Guia de uso de acordo com seu perfil",
+        "close": "Fechar",
+        "general": {
+            "title": "Visão Geral",
+            "content": "Bem-vindo ao SWAT4. Use este painel para administrar o Active Directory de forma centralizada e ágil."
+        },
+        "users": {
+            "title": "Usuários",
+            "content": "Crie contas de domínio, gerencie dados de perfil, ative/desative acessos ou redefina senhas com apenas alguns cliques."
+        },
+        "groups": {
+            "title": "Grupos",
+            "content": "Crie e edite grupos de Segurança ou Distribuição. Você pode gerenciar a filiação (membros) de todos os grupos visíveis ao seu perfil."
+        },
+        "shares": {
+            "title": "Compartilhamentos",
+            "content": "(Exclusivo para Admins) Gerencie diretórios compartilhados de rede, definindo acessos (Leitura, Gravação e Convidado)."
+        },
+        "dns": {
+            "title": "DNS",
+            "content": "(Exclusivo para Admins) Monitore zonas DNS e gerencie as resoluções de nomes integradas ao Active Directory."
+        },
+        "activity": {
+            "title": "Atividades",
+            "content": "(Exclusivo para Admins) Visão holística da saúde e das estatísticas do controlador de domínio."
+        },
+        "settings": {
+             "title": "Configurações Globais",
+             "content": "(Exclusivo para Admins) Edite as políticas de senha (comprimento, complexidade, validade) e os filtros avançados de visibilidade RBAC."
+        }
+    }
+}

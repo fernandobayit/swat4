@@ -1,0 +1,48 @@
+# ─────────────────────────────────────────────────────────────
+#  SWAT4 — Production deployment (Samba AD on host, no DC container)
+#
+#  Prerequisites on the production host:
+#    1. Copy .env.prod.example to .env and edit values
+#    2. Login to your Container Registry (docker login <registry>)
+#    3. Set REGISTRY and TAG env vars or edit the image names below
+#
+#  Usage:
+#    REGISTRY=registry.example.com/swat4 TAG=v1.0.0 docker compose -f docker-compose.prod.yml up -d
+# ─────────────────────────────────────────────────────────────
+
+services:
+  backend:
+    image: ${REGISTRY:-swat4}-backend:${TAG:-latest}
+    container_name: swat4-backend
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Read Samba logs and config from the host
+      - /var/log/samba:/var/log/samba:ro
+      - /etc/samba:/etc/samba
+      # Persistent SQLite data for SWAT4 (activity log, role_settings)
+      - swat4-data:/app/data
+      # Shares path (same as the host Samba shares)
+      - /mnt/data:/mnt/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    image: ${REGISTRY:-swat4}-frontend:${TAG:-latest}
+    container_name: swat4-frontend
+    environment:
+      # Browser-facing API URL (must point to the host where backend runs)
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      # Server-side API URL (container-to-container via Docker network)
+      - API_URL=http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  swat4-data:

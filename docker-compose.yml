@@ -1,0 +1,90 @@
+# Dev stack. NOTE: the samba-dc service comes from the separate
+# samba-ad-fs project — clone it at ./samba-dc to run it locally.
+# (Or use docker-compose.prod.yml against a host Samba AD DC.)
+services:
+  samba-dc:
+    build:
+      context: ./samba-dc
+      dockerfile: Dockerfile
+    container_name: swat4-samba-dc
+    hostname: dc1
+    domainname: swat.local
+    privileged: true
+    env_file:
+      - .env
+    volumes:
+      - samba-data:/var/lib/samba
+      - samba-etc:/etc/samba
+      - samba-logs:/var/log/samba
+      - swat4-shares:/mnt/data
+    ports:
+      - "389:389"
+      - "636:636"
+      - "445:445"
+      - "88:88"
+      - "464:464"
+      - "3268:3268"
+      - "3269:3269"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "samba-tool", "processes", "--configfile=/etc/samba/smb.conf" ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      swat-net:
+        ipv4_address: 172.20.0.10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: swat4-backend
+    env_file:
+      - .env
+    volumes:
+      - samba-logs:/var/log/samba:ro
+      - samba-etc:/etc/samba
+      - swat4-data:/app/data
+      - swat4-shares:/mnt/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      samba-dc:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      swat-net:
+
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: swat4-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - API_URL=http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      swat-net:
+
+
+volumes:
+  samba-data:
+  samba-etc:
+  samba-logs:
+  swat4-data:
+  swat4-shares:
+
+networks:
+  swat-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
