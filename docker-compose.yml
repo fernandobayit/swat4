@@ -10,6 +10,8 @@ services:
     hostname: dc1
     domainname: swat.local
     privileged: true
+    devices:
+      - /dev/net/tun
     env_file:
       - .env
     volumes:
