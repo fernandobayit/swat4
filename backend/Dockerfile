@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     samba-common-bin \
     samba \
     samba-ad-provision \
+    python3-samba \
     krb5-user \
     smbclient \
     && rm -rf /var/lib/apt/lists/*
