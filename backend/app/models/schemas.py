@@ -215,10 +215,11 @@ class PasswordPolicyUpdate(BaseModel):
 class RoleSettingsSchema(BaseModel):
     visible_groups_regex: str = "^.*$"
     visible_groups_list: List[str] = []
-    can_view_dns: bool = False
-    can_manage_users: bool = False
-    can_manage_groups: bool = False
-    can_manage_shares: bool = False
+    can_view_dns: bool = True
+    can_manage_users: bool = True
+    can_manage_groups: bool = True
+    can_manage_shares: bool = True
+    visible_ous: List[str] = []
 
 # Rebuild models for forward references
 OUNode.model_rebuild()

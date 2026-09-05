@@ -116,3 +116,21 @@ def can_view_dns(current_user: dict = Depends(get_current_user)):
     if OPERATOR_ROLE in (current_user.get("groups") or []):
         return get_role_settings(OPERATOR_ROLE).get("can_view_dns", False)
     return False
+
+
+def get_visible_ous(current_user: dict):
+    """DNs de OUs visiveis (match de subarvore) ou None se irrestrito."""
+    groups = current_user.get("groups") or []
+    if ADMIN_ROLE in groups:
+        return None
+    if OPERATOR_ROLE in groups:
+        ous = get_role_settings(OPERATOR_ROLE).get("visible_ous") or []
+        return ous if ous else None
+    return []
+
+
+def is_ou_visible(dn: str, visible_ous) -> bool:
+    if visible_ous is None:
+        return True
+    d = (dn or "").lower()
+    return any(d == ou.lower() or d.endswith("," + ou.lower()) for ou in visible_ous)
