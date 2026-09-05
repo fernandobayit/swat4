@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, List
-from app.auth.rbac import require_role, require_permission
+from app.config import settings
+from app.auth.rbac import require_role, require_permission, get_visible_ous, is_ou_visible
 from app.services import ldap_service
 from app.services import samba_tool
 from app.models.schemas import UserCreate, UserUpdate, UserResponse
@@ -18,6 +19,11 @@ async def list_users(
     """List all users, optionally filtered by OU."""
     try:
         users = ldap_service.list_users(ou)
+        visible = get_visible_ous(current_user)
+        users = [
+            u for u in users
+            if is_ou_visible(u.get("ou") or u.get("dn", ""), visible)
+        ]
         return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -41,6 +47,16 @@ async def create_user(
     current_user: dict = Depends(require_permission("manage_users")),
 ):
     """Create a new AD user."""
+    visible = get_visible_ous(current_user)
+
+    if user.ou:
+        parent_dn = user.ou if "DC=" in user.ou else f"{user.ou},{settings.samba_base_dn}"
+    else:
+        parent_dn = f"CN=Users,{settings.samba_base_dn}"
+
+    if not is_ou_visible(parent_dn, visible):
+        raise HTTPException(status_code=403, detail="OU fora das OUs visiveis do perfil")
+
     try:
         result = samba_tool.create_user(
             username=user.username,
@@ -67,6 +83,10 @@ async def update_user(
         existing = ldap_service.get_user(username)
         if existing is None:
             raise HTTPException(status_code=404, detail="User not found")
+
+        visible = get_visible_ous(current_user)
+        if not is_ou_visible(existing["dn"], visible):
+            raise HTTPException(status_code=403, detail="OU fora das OUs visiveis do perfil")
 
         if user.enabled is not None:
             if user.enabled:
@@ -106,6 +126,10 @@ async def delete_user(
         existing = ldap_service.get_user(username)
         if existing is None:
             raise HTTPException(status_code=404, detail="User not found")
+
+        visible = get_visible_ous(current_user)
+        if not is_ou_visible(existing["dn"], visible):
+            raise HTTPException(status_code=403, detail="OU fora das OUs visiveis do perfil")
 
         result = samba_tool.delete_user(username)
         log_activity(current_user.get("username", "system"), "DELETE", "User", username, "Deleted user")

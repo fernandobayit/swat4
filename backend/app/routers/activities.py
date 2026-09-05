@@ -9,7 +9,7 @@ router = APIRouter()
 async def list_activities(
     limit: int = 100,
     offset: int = 0,
-    current_user: dict = Depends(require_role(["Domain Admins"])),
+    current_user: dict = Depends(require_role(["Domain Admins", "Account Operators"])),
 ):
-    """Get the activity log. Restricted to Domain Admins."""
+    """Get the activity log. Restricted to Domain Admins and Account Operators."""
     return get_activities(limit, offset)

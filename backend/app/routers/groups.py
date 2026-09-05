@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, List
-from app.auth.rbac import require_role, require_permission
+from app.config import settings
+from app.auth.rbac import require_role, require_permission, get_visible_ous, is_ou_visible
 from app.services import ldap_service
 from app.services import samba_tool
 from app.models.schemas import GroupCreate, GroupUpdate, GroupResponse, GroupMemberAction
@@ -23,6 +24,7 @@ async def list_groups(
     """List security groups. Admins see all, Operators see filtered list."""
     try:
         groups = ldap_service.list_groups(ou)
+        visible = get_visible_ous(current_user)
 
         if ADMIN_ROLE not in current_user.get("groups", []):
             role_settings = get_role_settings(OPERATOR_ROLE)
@@ -43,6 +45,11 @@ async def list_groups(
                 ]
             else:
                 groups = [g for g in groups if "admin" not in g["name"].lower()]
+
+        groups = [
+            g for g in groups
+            if is_ou_visible(g.get("ou") or g.get("dn", ""), visible)
+        ]
 
         return groups
     except Exception as e:
@@ -67,6 +74,16 @@ async def create_group(
     current_user: dict = Depends(require_permission("manage_groups")),
 ):
     """Create a new security group."""
+    visible = get_visible_ous(current_user)
+
+    if group.ou:
+        parent_dn = group.ou if "DC=" in group.ou else f"{group.ou},{settings.samba_base_dn}"
+    else:
+        parent_dn = f"CN=Users,{settings.samba_base_dn}"
+
+    if not is_ou_visible(parent_dn, visible):
+        raise HTTPException(status_code=403, detail="OU fora das OUs visiveis do perfil")
+
     try:
         result = samba_tool.create_group(
             name=group.name,
@@ -111,6 +128,10 @@ async def delete_group(
         existing = ldap_service.get_group(name)
         if existing is None:
             raise HTTPException(status_code=404, detail="Group not found")
+
+        visible = get_visible_ous(current_user)
+        if not is_ou_visible(existing["dn"], visible):
+            raise HTTPException(status_code=403, detail="OU fora das OUs visiveis do perfil")
 
         result = samba_tool.delete_group(name)
         log_activity(current_user.get("username", "system"), "DELETE", "Group", name, "Deleted group")
