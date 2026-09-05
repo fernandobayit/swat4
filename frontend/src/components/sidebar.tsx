@@ -38,8 +38,8 @@ const menuItems = [
     { key: 'groups', href: '/dashboard/groups', icon: Shield, labelKey: 'nav.groups', permission: 'can_manage_groups' },
     { key: 'shares', href: '/dashboard/shares', icon: HardDrive, labelKey: 'nav.shares', permission: 'can_manage_shares' },
     { key: 'logs', href: '/dashboard/logs', icon: FileText, labelKey: 'nav.logs' },
-    { key: 'dns', href: '/dashboard/dns', icon: Globe, labelKey: 'nav.dns', requiredRole: 'Domain Admins' },
-    { key: 'activity', href: '/dashboard/activity', icon: Activity, labelKey: 'nav.activity', requiredRole: 'Domain Admins' },
+    { key: 'dns', href: '/dashboard/dns', icon: Globe, labelKey: 'nav.dns', permission: 'can_view_dns' },
+    { key: 'activity', href: '/dashboard/activity', icon: Activity, labelKey: 'nav.activity' },
     { key: 'settings', href: '/dashboard/settings', icon: Settings, labelKey: 'nav.settings', requiredRole: 'Domain Admins' },
 ];
 
