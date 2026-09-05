@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
+import { useAuth } from '@/lib/auth';
 import { domain as domainApi, roles as rolesApi, ous as ousApi } from '@/lib/api';
 import { ShieldAlert, Save, X, Users } from 'lucide-react';
 import OUCheckboxTree from '@/components/ou-checkbox-tree';
@@ -9,6 +10,8 @@ import type { OUNode } from '@/lib/types';
 
 export default function SettingsPage() {
     const { t } = useTranslation();
+    const { user } = useAuth();
+    const isDomainAdmin = user?.groups?.includes('Domain Admins') ?? false;
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -112,6 +115,17 @@ export default function SettingsPage() {
             setOpSaving(false);
         }
     };
+
+    if (!isDomainAdmin) {
+        return (
+            <div className="animate-fade-in max-w-4xl flex items-center justify-center py-24">
+                <div className="p-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
+                    <ShieldAlert size={16} />
+                    <span>{t('auth.notAuthorized')}</span>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
