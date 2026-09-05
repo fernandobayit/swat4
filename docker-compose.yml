@@ -37,7 +37,6 @@ services:
     pull_policy: always
     container_name: swat4-frontend
     environment:
-      - NEXT_PUBLIC_API_URL=${SWAT4_API_URL:-http://localhost:8000}
       - API_URL=http://backend:8000
     ports:
       - "3000:3000"
