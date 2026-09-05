@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
-import { domain as domainApi } from '@/lib/api';
-import { ShieldAlert, Save, X } from 'lucide-react';
+import { domain as domainApi, roles as rolesApi, ous as ousApi } from '@/lib/api';
+import { ShieldAlert, Save, X, Users } from 'lucide-react';
+import OUCheckboxTree from '@/components/ou-checkbox-tree';
+import type { OUNode } from '@/lib/types';
 
 export default function SettingsPage() {
     const { t } = useTranslation();
@@ -23,8 +25,24 @@ export default function SettingsPage() {
         reset_lockout_after_mins: 30
     });
 
+    const [opLoading, setOpLoading] = useState(true);
+    const [opSaving, setOpSaving] = useState(false);
+    const [opError, setOpError] = useState('');
+    const [opSuccess, setOpSuccess] = useState('');
+    const [opProfile, setOpProfile] = useState<any>({
+        can_manage_users: false,
+        can_manage_groups: false,
+        can_manage_shares: false,
+        can_view_dns: false,
+        visible_groups_regex: '',
+        visible_groups_list: []
+    });
+    const [opSelectedOus, setOpSelectedOus] = useState<string[]>([]);
+    const [opTree, setOpTree] = useState<OUNode[]>([]);
+
     useEffect(() => {
         loadData();
+        loadOperatorProfile();
     }, []);
 
     const loadData = async () => {
@@ -51,6 +69,47 @@ export default function SettingsPage() {
             setError(e.message || 'Error saving settings');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const loadOperatorProfile = async () => {
+        try {
+            setOpLoading(true);
+            const [settings, tree] = await Promise.all([
+                rolesApi.getSettings('Account Operators'),
+                ousApi.tree(),
+            ]);
+            setOpProfile((prev: any) => ({ ...prev, ...(settings || {}) }));
+            setOpSelectedOus(settings?.visible_ous || []);
+            setOpTree(tree || []);
+        } catch (e: any) {
+            setOpError(e.message || 'Error loading operator profile');
+        } finally {
+            setOpLoading(false);
+        }
+    };
+
+    const handleOpSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setOpSaving(true);
+        setOpError('');
+        setOpSuccess('');
+        try {
+            const payload = {
+                visible_groups_regex: opProfile.visible_groups_regex || '^.*$',
+                visible_groups_list: opProfile.visible_groups_list || [],
+                can_view_dns: !!opProfile.can_view_dns,
+                can_manage_users: !!opProfile.can_manage_users,
+                can_manage_groups: !!opProfile.can_manage_groups,
+                can_manage_shares: !!opProfile.can_manage_shares,
+                visible_ous: opSelectedOus
+            };
+            await rolesApi.updateSettings('Account Operators', payload);
+            setOpSuccess((t as any)('settings.opSaved') || 'Operator profile saved.');
+        } catch (e: any) {
+            setOpError(e.message || 'Error saving operator profile');
+        } finally {
+            setOpSaving(false);
         }
     };
 
@@ -175,6 +234,106 @@ export default function SettingsPage() {
                     <button type="submit" disabled={saving}
                         className="flex items-center gap-2 px-6 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent-light active:scale-95 disabled:opacity-50 transition-all shadow-sm">
                         <Save size={16} /> {saving ? t('common.loading') : t('common.save')}
+                    </button>
+                </div>
+            </form>
+
+            {opError && (
+                <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex justify-between items-center">
+                    <span className="flex items-center gap-2"><ShieldAlert size={16} /> {opError}</span>
+                    <button type="button" onClick={() => setOpError('')}><X size={14} /></button>
+                </div>
+            )}
+
+            {opSuccess && (
+                <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex justify-between items-center">
+                    <span>{opSuccess}</span>
+                    <button type="button" onClick={() => setOpSuccess('')}><X size={14} /></button>
+                </div>
+            )}
+
+            <form onSubmit={handleOpSave} className="bg-white rounded-2xl border border-border/40 shadow-card overflow-hidden mt-8">
+                <div className="p-6 border-b border-border/20">
+                    <div className="flex items-center gap-2.5 mb-1">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Users size={16} className="text-primary-dark" />
+                        </div>
+                        <h2 className="text-lg font-semibold text-accent">{(t as any)('settings.operatorProfile') || 'Perfil do Account Operators'}</h2>
+                    </div>
+                </div>
+
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-center justify-between p-4 bg-surface/30 rounded-xl border border-border/40">
+                        <div>
+                            <p className="font-medium text-sm text-accent">{(t as any)('settings.opManageUsers') || 'Gerenciar usuários'}</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" checked={!!opProfile.can_manage_users}
+                                disabled={opLoading}
+                                onChange={(e) => setOpProfile({ ...opProfile, can_manage_users: e.target.checked })} />
+                            <div className="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border/40 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-sm border border-border/40"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-surface/30 rounded-xl border border-border/40">
+                        <div>
+                            <p className="font-medium text-sm text-accent">{(t as any)('settings.opManageGroups') || 'Gerenciar grupos'}</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" checked={!!opProfile.can_manage_groups}
+                                disabled={opLoading}
+                                onChange={(e) => setOpProfile({ ...opProfile, can_manage_groups: e.target.checked })} />
+                            <div className="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border/40 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-sm border border-border/40"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-surface/30 rounded-xl border border-border/40">
+                        <div>
+                            <p className="font-medium text-sm text-accent">{(t as any)('settings.opManageShares') || 'Gerenciar compartilhamentos'}</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" checked={!!opProfile.can_manage_shares}
+                                disabled={opLoading}
+                                onChange={(e) => setOpProfile({ ...opProfile, can_manage_shares: e.target.checked })} />
+                            <div className="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border/40 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-sm border border-border/40"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-surface/30 rounded-xl border border-border/40">
+                        <div>
+                            <p className="font-medium text-sm text-accent">{(t as any)('settings.opViewDns') || 'Visualizar DNS'}</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" checked={!!opProfile.can_view_dns}
+                                disabled={opLoading}
+                                onChange={(e) => setOpProfile({ ...opProfile, can_view_dns: e.target.checked })} />
+                            <div className="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border/40 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-sm border border-border/40"></div>
+                        </label>
+                    </div>
+
+                    <div className="col-span-1 md:col-span-2 space-y-2">
+                        <p className="font-medium text-sm text-accent">{(t as any)('settings.opVisibleOus') || 'OUs visíveis'}</p>
+                        {opLoading ? (
+                            <div className="flex items-center justify-center py-8 rounded-xl border border-border/40">
+                                <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                            </div>
+                        ) : (
+                            <>
+                                <OUCheckboxTree
+                                    tree={opTree}
+                                    selected={opSelectedOus}
+                                    onChange={setOpSelectedOus}
+                                />
+                                <p className="text-xs text-accent/50">{(t as any)('settings.opVisibleOusHint') || 'Sem seleção, o operador visualiza todas as OUs.'}</p>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                <div className="px-6 py-4 bg-surface/20 border-t border-border/20 flex justify-end">
+                    <button type="submit" disabled={opSaving || opLoading}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent-light active:scale-95 disabled:opacity-50 transition-all shadow-sm">
+                        <Save size={16} /> {opSaving ? t('common.loading') : (t as any)('settings.opSave') || 'Salvar perfil'}
                     </button>
                 </div>
             </form>
