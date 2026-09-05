@@ -147,7 +147,16 @@
         "resetLockout": "Zerar Bloqueio Após (Minutos)",
         "subtitle": "Configurar opções de todo o domínio",
         "complexitySubtitle": "Requer letras maiúsculas, minúsculas, números e símbolos.",
-        "neverLockout": "0 significa sem limite de bloqueio"
+        "neverLockout": "0 significa sem limite de bloqueio",
+        "operatorProfile": "Perfil do Account Operators",
+        "opManageUsers": "Gerenciar usuários",
+        "opManageGroups": "Gerenciar grupos",
+        "opManageShares": "Gerenciar compartilhamentos",
+        "opViewDns": "Visualizar DNS",
+        "opVisibleOus": "OUs visíveis",
+        "opVisibleOusHint": "Sem seleção, o operador visualiza todas as OUs.",
+        "opSaved": "Perfil do operador salvo.",
+        "opSave": "Salvar perfil"
     },
     "dns": {
         "title": "Gerenciamento de DNS",

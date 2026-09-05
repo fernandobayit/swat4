@@ -144,7 +144,16 @@
         "resetLockout": "Reset Lockout After (Minutes)",
         "subtitle": "Configure domain-wide configurations",
         "complexitySubtitle": "Requires uppercase, lowercase, numbers, and symbols.",
-        "neverLockout": "0 means never lockout"
+        "neverLockout": "0 means never lockout",
+        "operatorProfile": "Operator Profile",
+        "opManageUsers": "Manage users",
+        "opManageGroups": "Manage groups",
+        "opManageShares": "Manage shares",
+        "opViewDns": "View DNS",
+        "opVisibleOus": "Visible OUs",
+        "opVisibleOusHint": "No selection = all OUs visible.",
+        "opSaved": "Operator profile saved.",
+        "opSave": "Save profile"
     },
     "dns": {
         "title": "DNS Management",
