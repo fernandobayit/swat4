@@ -16,7 +16,7 @@ services:
       SAMBA_REALM: ${SAMBA_REALM:-SWAT.LOCAL}
       SAMBA_DOMAIN: ${SAMBA_DOMAIN:-SWAT}
       SAMBA_BASE_DN: ${SAMBA_BASE_DN:-DC=swat,DC=local}
-      LDAP_URL: ${LDAP_URL:-ldap://host.docker.internal:389}
+      LDAP_URL: ${LDAP_URL:-ldaps://host.docker.internal:636}
       SAMBA_ADMIN_USER: ${SAMBA_ADMIN_USER:-administrator}
       SAMBA_ADMIN_PASSWORD: ${SAMBA_ADMIN_PASSWORD:-ChangeThisPassword}
       JWT_SECRET: ${JWT_SECRET:-change-this-jwt-secret}
