@@ -93,8 +93,14 @@ export default function Sidebar() {
                 'h-16 flex items-center border-b border-border/40 px-4',
                 collapsed ? 'justify-center' : 'gap-3'
             )}>
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-white overflow-hidden">
-                    <img src="/saxis-icon.png" alt="Saxis Logo" className="w-full h-full object-cover" />
+                <div className={cn(
+                    'flex items-center justify-center flex-shrink-0',
+                    collapsed ? 'w-9 h-9' : 'h-12'
+                )}>
+                    <img src="/saxis-2.png" alt="Saxis Logo" className={cn(
+                        'object-contain',
+                        collapsed ? 'w-full h-full' : 'h-full w-auto'
+                    )} />
                 </div>
                 {!collapsed && (
                     <div className="animate-fade-in">
