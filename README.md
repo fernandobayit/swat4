@@ -1,9 +1,8 @@
 # SWAT4
 
 Painel web de gerenciamento para Samba 4 Active Directory. Roda como dois
-containers (backend FastAPI, frontend Next.js) via imagens do GitHub Container
-Registry, e gerencia um DC que pode estar rodando no proprio host ou
-containerizado (projeto [samba-ad-fs](https://github.com/fernandobayit/samba-ad-fs)).
+containers (backend FastAPI, frontend Next.js), e gerencia um DC que pode
+estar rodando no proprio host ou containerizado.
 
 ## Topologias
 
