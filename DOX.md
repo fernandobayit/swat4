@@ -101,7 +101,8 @@ swat/
 │       └── test_api.py
 │
 ├── frontend/
-│   ├── Dockerfile              # Node 20-alpine + next dev
+│   ├── Dockerfile              # Node 20-bookworm-slim + NetBird (peer opcional via NETBIRD_SETUP_KEY)
+│   ├── entrypoint.sh           # Next.js + NetBird opcional (mesmo modelo do DC do samba-ad-fs)
 │   ├── package.json            # Dependencias Node
 │   ├── next.config.js          # Proxy /api/* -> backend:8000
 │   ├── tailwind.config.ts      # Design system (cores, fontes, animacoes)
@@ -501,7 +502,7 @@ Chaves organizadas em: `common`, `auth`, `nav`, `dashboard`, `users`, `groups`, 
 |---|---|---|---|---|
 | `samba-dc` | `swat4-samba-dc` | Ubuntu 22.04 | 389, 636, 445, 88, 464, 3268, 3269 | `privileged: true` |
 | `backend` | `swat4-backend` | Python 3.12-slim | 8000 | Normal |
-| `frontend` | `swat4-frontend` | Node 20-alpine | 3000 | Normal |
+| `frontend` | `swat4-frontend` | Node 20-bookworm-slim (+ NetBird 0.79.0) | 3000 | `privileged: true` + `/dev/net/tun` (NetBird opcional — sem `NETBIRD_SETUP_KEY`, roda Next.js puro como antes) |
 
 ### 6.2 Volumes
 
@@ -512,6 +513,8 @@ Chaves organizadas em: `common`, `auth`, `nav`, `dashboard`, `users`, `groups`, 
 | `samba-logs` | `/var/log/samba` | Logs do Samba (read-only no backend) |
 | `swat4-data` | `/app/data` | SQLite de atividades e roles |
 | `swat4-shares` | `/mnt/data` | Diretorio de compartilhamentos |
+| `swat4-netbird-config` | `/etc/netbird` (frontend) | Config/identidade do peer NetBird do frontend (persistente) |
+| `swat4-netbird-estado` | `/var/lib/netbird` (frontend) | Estado do cliente NetBird do frontend (persistente) |
 
 ### 6.3 Rede
 

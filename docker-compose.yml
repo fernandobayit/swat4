@@ -36,13 +36,26 @@ services:
     image: ghcr.io/fernandobayit/swat4-frontend:latest
     pull_policy: always
     container_name: swat4-frontend
+    privileged: true
+    devices:
+      - /dev/net/tun
     environment:
       - API_URL=http://backend:8000
+      # NetBird embutido (opcional): com setup key definida, o frontend
+      # entra na mesh como peer INDEPENDENTE do DC (mesmo modelo do
+      # samba-ad-fs). Vazio = sobe apenas o painel, sem NetBird.
+      - NETBIRD_MANAGEMENT_URL=${NETBIRD_MANAGEMENT_URL:-}
+      - NETBIRD_SETUP_KEY=${NETBIRD_SETUP_KEY:-}
     ports:
       - "3000:3000"
     depends_on:
       - backend
     restart: unless-stopped
+    volumes:
+      - swat4-netbird-config:/etc/netbird
+      - swat4-netbird-estado:/var/lib/netbird
 
 volumes:
   swat4-data:
+  swat4-netbird-config:
+  swat4-netbird-estado:

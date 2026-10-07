@@ -78,6 +78,30 @@ funcionando.
 - **Nota de rede:** quem subir primeiro (DC ou swat4) cria a rede `swat-net`;
   o outro se junta automaticamente.
 
+## Acesso via NetBird (opcional)
+
+O frontend pode entrar na malha NetBird como **peer independente** (mesmo
+modelo do DC no samba-ad-fs): o painel fica acessivel via
+`http://<ip-mesh>:3000` a partir de qualquer peer autorizado, sem depender do
+NetBird embutido do DC.
+
+```bash
+export NETBIRD_MANAGEMENT_URL='https://seu-management:33073'
+export NETBIRD_SETUP_KEY='sua-setup-key'
+docker compose up -d
+```
+
+- Sem `NETBIRD_SETUP_KEY`, o frontend sobe normalmente sem NetBird.
+- A identidade do peer persiste nos volumes `swat4-netbird-config` e
+  `swat4-netbird-estado` (IP da malha estavel entre recriacoes).
+- Se o acesso for exclusivo pela mesh, restrinja as portas publicadas no host
+  para `127.0.0.1:` (ex.: `"127.0.0.1:3000:3000"` e `"127.0.0.1:8000:8000"`).
+- O DNS management do cliente fica **desativado** (`netbird up --disable-dns`)
+  para nao conflitar com o DNS interno do Docker usado na resolucao do
+  `backend` (rewrite `/api` do Next.js).
+- O container do frontend precisa de `privileged: true` + `/dev/net/tun`
+  (ja configurados no compose).
+
 ## Variaveis de ambiente
 
 | Nome | Default | Descricao |
@@ -92,6 +116,8 @@ funcionando.
 | `JWT_SECRET` | `change-this-jwt-secret` | Segredo JWT — obrigatorio trocar |
 | `ALLOWED_LOGIN_GROUPS` | `Domain Admins,Account Operators` | Grupos com acesso ao painel |
 | `SWAT4_API_URL` | `http://localhost:8000` | URL publica do backend usada no navegador: use o host/IP do servidor se o painel for acessado remotamente (importante no modo containerizado se o navegador nao rodar no mesmo host do docker) |
+| `NETBIRD_MANAGEMENT_URL` | *(vazio)* | URL do Management NetBird self-hosted (obrigatoria se `NETBIRD_SETUP_KEY` estiver definida) |
+| `NETBIRD_SETUP_KEY` | *(vazio)* | Setup key para o frontend entrar na mesh como peer independente; vazio desativa o NetBird |
 
 ## Arquitetura resumida
 
