@@ -35,8 +35,13 @@ services:
   frontend:
     image: ghcr.io/fernandobayit/swat4-frontend:latest
     pull_policy: always
-    container_name: swat4-frontend
-    privileged: true
+    # O container_name foi removido para multi-host: cada host pode nomear
+    # como quiser (via docker -p, Portainer, ou um compose local)
+    # NetBird precisa criar a interface wt0 e gerenciar rotas: caps
+    # dedicados (em vez de privileged) — portavel entre hosts.
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     devices:
       - /dev/net/tun
     environment:
@@ -46,6 +51,10 @@ services:
       # samba-ad-fs). Vazio = sobe apenas o painel, sem NetBird.
       - NETBIRD_MANAGEMENT_URL=${NETBIRD_MANAGEMENT_URL:-}
       - NETBIRD_SETUP_KEY=${NETBIRD_SETUP_KEY:-}
+      # NETBIRD_STRICT=true = falha o container se a mesh nao subir
+      # (padrao: WARN e sobe so o painel — util em multi-host, onde
+      # alguns hosts podem nao ter /dev/net/tun)
+      - NETBIRD_STRICT=${NETBIRD_STRICT:-false}
     ports:
       - "3000:3000"
     depends_on:

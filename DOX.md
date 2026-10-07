@@ -502,7 +502,7 @@ Chaves organizadas em: `common`, `auth`, `nav`, `dashboard`, `users`, `groups`, 
 |---|---|---|---|---|
 | `samba-dc` | `swat4-samba-dc` | Ubuntu 22.04 | 389, 636, 445, 88, 464, 3268, 3269 | `privileged: true` |
 | `backend` | `swat4-backend` | Python 3.12-slim | 8000 | Normal |
-| `frontend` | `swat4-frontend` | Node 20-bookworm-slim (+ NetBird 0.79.0) | 3000 | `privileged: true` + `/dev/net/tun` (NetBird opcional — sem `NETBIRD_SETUP_KEY`, roda Next.js puro como antes) |
+| `frontend` | `swat4-frontend` | Node 20-bookworm-slim (+ NetBird 0.79.0) | 3000 | `cap_add: NET_ADMIN/NET_RAW` + `/dev/net/tun` (NetBird opcional — sem `NETBIRD_SETUP_KEY`, roda Next.js puro como antes; em hosts sem tun, degrada com WARN e sobe so o painel, salvo `NETBIRD_STRICT=true`) |
 
 ### 6.2 Volumes
 

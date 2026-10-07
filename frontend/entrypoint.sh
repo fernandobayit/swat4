@@ -19,13 +19,29 @@ fi
 
 echo "==> NetBird: starting..."
 
+# Comportamento multi-host: por padrao (NETBIRD_STRICT=false), se o ambiente
+# nao suporta mesh (sem /dev/net/tun — ex.: LXC/Proxmox sem recurso TUN),
+# apenas avisa e sobe o painel sem NetBird. Com NETBIRD_STRICT=true, mantem
+# o fail-fast (exit 1).
+_warn_degrade() {
+    echo "WARN: NetBird desativado neste container — $1" >&2
+    echo "WARN: Subindo apenas o painel. (NETBIRD_STRICT=true para abortar o container nesse caso)" >&2
+    exec gosu "$NEXT_USER" npm run start
+}
+
 if [ ! -c /dev/net/tun ]; then
-    echo "ERROR: /dev/net/tun not available. Add 'devices: - /dev/net/tun' to the frontend service in docker-compose.yml." >&2
-    exit 1
+    if [ "$NETBIRD_STRICT" = "true" ]; then
+        echo "ERROR: /dev/net/tun not available. Add 'devices: - /dev/net/tun' to the frontend service in docker-compose.yml (or set NETBIRD_STRICT=false)." >&2
+        exit 1
+    fi
+    _warn_degrade "/dev/net/tun not available no host/container."
 fi
 if [ -z "$NETBIRD_MANAGEMENT_URL" ]; then
-    echo "ERROR: NETBIRD_MANAGEMENT_URL is required when NETBIRD_SETUP_KEY is set." >&2
-    exit 1
+    if [ "$NETBIRD_STRICT" = "true" ]; then
+        echo "ERROR: NETBIRD_MANAGEMENT_URL is required when NETBIRD_SETUP_KEY is set." >&2
+        exit 1
+    fi
+    _warn_degrade "NETBIRD_MANAGEMENT_URL vazia com NETBIRD_SETUP_KEY definida."
 fi
 
 mkdir -p /var/log/netbird /etc/netbird /var/lib/netbird
@@ -54,8 +70,12 @@ done
 # dele), nao do container.
 netbird up --management-url "$NETBIRD_MANAGEMENT_URL" --setup-key "$NETBIRD_SETUP_KEY" \
     --disable-dns 2>&1 || {
-    echo "ERROR: netbird up failed. Check NETBIRD_MANAGEMENT_URL and NETBIRD_SETUP_KEY." >&2
-    exit 1
+    if [ "$NETBIRD_STRICT" = "true" ]; then
+        echo "ERROR: netbird up failed. Check NETBIRD_MANAGEMENT_URL and NETBIRD_SETUP_KEY." >&2
+        exit 1
+    fi
+    echo "WARN: netbird up falhou — subindo apenas o painel (NETBIRD_STRICT=false)." >&2
+    exec gosu "$NEXT_USER" npm run start
 }
 
 connected=0

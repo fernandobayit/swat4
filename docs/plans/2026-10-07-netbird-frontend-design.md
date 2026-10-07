@@ -25,9 +25,16 @@ malha (`http://<ip-mesh>:3000`), sem depender do NetBird do DC. Sem
   `swat4-netbird-config` + `swat4-netbird-estado`
 - Runtime do frontend troca de `node:20-alpine` para `node:20-bookworm-slim`
   (alpine nao possui pacote oficial; repo oficial `pkgs.netbird.io/debian`)
-- Container roda como **root** com `privileged: true` + `/dev/net/tun`
-  (paridade com o DC); o Next.js continua executando como usuario `nextjs`
-  via `su`. Alternativa futura menos privilegiada: `cap_add: NET_ADMIN`.
+- Container roda com `cap_add: NET_ADMIN/NET_RAW` + `device /dev/net/tun`
+  (suficiente para o netbird criar a wt0; sem `privileged` — mais portavel
+  entre hosts). O Next.js continua executando como usuario `nextjs` via
+  `gosu`.
+- **Multi-host (2026-10-07)**: `container_name:` removido do compose-base;
+  `NETBIRD_STRICT` (default `false`) — em host sem `/dev/net/tun` (ex.:
+  LXC/Proxmox sem recurso TUN) o entrypoint apenas avisa (WARN) e sobe o
+  painel sem NetBird; com `NETBIRD_STRICT=true`, mantem o fail-fast (exit 1)
+  tambem nos casos de tun ausente, `NETBIRD_MANAGEMENT_URL` vazia e falha do
+  `netbird up`.
 - `docker-compose.dc.yml` NAO muda: o peer do swat4 e independente da topologia
 
 ## Arquitetura

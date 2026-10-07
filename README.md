@@ -99,8 +99,13 @@ docker compose up -d
 - O DNS management do cliente fica **desativado** (`netbird up --disable-dns`)
   para nao conflitar com o DNS interno do Docker usado na resolucao do
   `backend` (rewrite `/api` do Next.js).
-- O container do frontend precisa de `privileged: true` + `/dev/net/tun`
-  (ja configurados no compose).
+- O container do frontend precisa de `cap_add: NET_ADMIN/NET_RAW` +
+  `/dev/net/tun` (ja configurados no compose). Em hosts sem `/dev/net/tun`
+  (ex.: LXC/Proxmox sem recurso TUN), o padrao e **degradar com aviso**:
+  o painel sobe sem NetBird. Para obrigar a mesh (abortar o container se nao
+  conectar), defina `NETBIRD_STRICT=true`.
+- O nome do container pode variar por host (remova `container_name:` ou ajuste
+  no seu compose de deploy) — a imagem e identica em ambos os casos.
 
 ## Variaveis de ambiente
 
