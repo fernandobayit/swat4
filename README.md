@@ -132,6 +132,9 @@ docker compose up -d
 - Imagens hospedadas em `ghcr.io/fernandobayit/swat4-backend` e
   `ghcr.io/fernandobayit/swat4-frontend`.
 
+  *Branch `netbird`: o frontend e publicado com a tag `:netbird` (com NetBird
+  embarcado). A `main` publica `:latest` (sem NetBird).*
+
 ## Desenvolvimento local dos servicos
 
 Para build local, descomente/crie `build:` nos servicos do compose (ou use o

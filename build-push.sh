@@ -52,9 +52,11 @@ docker build \
 
 echo ""
 echo "[2/4] Building frontend image..."
+# Branch netbird: frontend nunca recebe :latest (reservado a build da main, sem NetBird)
+FE_TAG="${TAG}"; if [ "${FE_TAG}" = "latest" ]; then FE_TAG="netbird"; fi
 docker build \
-  -t "${REGISTRY}-frontend:${TAG}" \
-  -t "${REGISTRY}-frontend:latest" \
+  -t "${REGISTRY}-frontend:${FE_TAG}" \
+  -t "${REGISTRY}-frontend:netbird" \
   -f "${SCRIPT_DIR}/frontend/Dockerfile" \
   "${SCRIPT_DIR}/frontend"
 
@@ -66,14 +68,14 @@ docker push "${REGISTRY}-backend:latest"
 
 echo ""
 echo "[4/4] Pushing frontend image..."
-docker push "${REGISTRY}-frontend:${TAG}"
-docker push "${REGISTRY}-frontend:latest"
+docker push "${REGISTRY}-frontend:${FE_TAG}"
+docker push "${REGISTRY}-frontend:netbird"
 
 echo ""
 echo "================================================"
 echo "  Done! Images pushed:"
 echo "    ${REGISTRY}-backend:${TAG}"
-echo "    ${REGISTRY}-frontend:${TAG}"
+echo "    ${REGISTRY}-frontend:${FE_TAG}"
 echo ""
 echo "  Deploy on the target host:"
 echo "    1. Aponte as imagens para ${REGISTRY} no docker-compose.yml (e docker-compose.dc.yml se precisar)"

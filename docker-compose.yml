@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ghcr.io/fernandobayit/swat4-frontend:latest
+    image: ghcr.io/fernandobayit/swat4-frontend:netbird
     pull_policy: always
     # O container_name foi removido para multi-host: cada host pode nomear
     # como quiser (via docker -p, Portainer, ou um compose local)
