@@ -37,34 +37,13 @@ services:
     pull_policy: always
     # O container_name foi removido para multi-host: cada host pode nomear
     # como quiser (via docker -p, Portainer, ou um compose local)
-    # NetBird precisa criar a interface wt0 e gerenciar rotas: caps
-    # dedicados (em vez de privileged) — portavel entre hosts.
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    devices:
-      - /dev/net/tun
     environment:
       - API_URL=http://backend:8000
-      # NetBird embutido (opcional): com setup key definida, o frontend
-      # entra na mesh como peer INDEPENDENTE do DC (mesmo modelo do
-      # samba-ad-fs). Vazio = sobe apenas o painel, sem NetBird.
-      - NETBIRD_MANAGEMENT_URL=${NETBIRD_MANAGEMENT_URL:-}
-      - NETBIRD_SETUP_KEY=${NETBIRD_SETUP_KEY:-}
-      # NETBIRD_STRICT=true = falha o container se a mesh nao subir
-      # (padrao: WARN e sobe so o painel — util em multi-host, onde
-      # alguns hosts podem nao ter /dev/net/tun)
-      - NETBIRD_STRICT=${NETBIRD_STRICT:-false}
     ports:
       - "3000:3000"
     depends_on:
       - backend
     restart: unless-stopped
-    volumes:
-      - swat4-netbird-config:/etc/netbird
-      - swat4-netbird-estado:/var/lib/netbird
 
 volumes:
   swat4-data:
-  swat4-netbird-config:
-  swat4-netbird-estado:
