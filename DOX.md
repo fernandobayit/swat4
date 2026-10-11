@@ -101,7 +101,7 @@ swat/
 │       └── test_api.py
 │
 ├── frontend/
-│   ├── Dockerfile              # Node 20-alpine
+│   ├── Dockerfile              # Node 20-bookworm-slim
 │   ├── package.json            # Dependencias Node
 │   ├── next.config.js          # Proxy /api/* -> backend:8000
 │   ├── tailwind.config.ts      # Design system (cores, fontes, animacoes)
@@ -501,7 +501,7 @@ Chaves organizadas em: `common`, `auth`, `nav`, `dashboard`, `users`, `groups`, 
 |---|---|---|---|---|
 | `samba-dc` | `swat4-samba-dc` | Ubuntu 22.04 | 389, 636, 445, 88, 464, 3268, 3269 | `privileged: true` |
 | `backend` | `swat4-backend` | Python 3.12-slim | 8000 | Normal |
-| `frontend` | `swat4-frontend` | Node 20-alpine | 3000 | Normal |
+| `frontend` | `swat4-frontend` | Node 20-bookworm-slim | 3000 | Normal |
 
 ### 6.2 Volumes
 
