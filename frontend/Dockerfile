@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       arm64) NB_ARCH=arm64 ;; \
       *) NB_ARCH=amd64 ;; \
     esac && \
-    curl -sSL -o /tmp/netbird.deb "https://github.com/netbirdio/netbird/releases/download/v0.79.0/netbird_0.79.0_linux_${NB_ARCH}.deb" && \
+    curl -sSL -o /tmp/netbird.deb "https://github.com/netbirdio/netbird/releases/download/v0.80.0/netbird_0.80.0_linux_${NB_ARCH}.deb" && \
     apt-get install -y --no-install-recommends /tmp/netbird.deb && \
     rm -f /tmp/netbird.deb && \
     rm -rf /var/lib/apt/lists/*
