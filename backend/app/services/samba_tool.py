@@ -299,6 +299,26 @@ def modify_group_description(name: str, description: str) -> str:
         conn.unbind_s()
 
 
+def _resolve_member_dn(conn, member: str) -> Optional[str]:
+    """Resolve o DN de um membro do grupo.
+
+    Aceita DN completo (fluxo normal do frontend, que envia o member DN)
+    ou nome (CN/sAMAccountName, compatibilidade com chamadas antigas).
+    Retorna None se nao resolver — o caller sinaliza o erro explicitamente.
+    """
+    m = (member or "").strip()
+    if not m:
+        return None
+    if "=" in m:  # parece um DN
+        try:
+            res = conn.search_s(m, ldap.SCOPE_BASE, "(objectClass=*)", ["objectClass"])
+            if res:
+                return m
+        except ldap.LDAPError:
+            pass  # DN inexistente/invalido: tenta resolver por nome abaixo
+    return _find_user_dn(conn, m) or _find_group_dn(conn, m)
+
+
 def add_group_members(group_name: str, members: List[str]) -> str:
     """Add members to a group."""
     conn = get_admin_connection()
@@ -307,17 +327,21 @@ def add_group_members(group_name: str, members: List[str]) -> str:
         if not group_dn:
             raise SambaToolError(f"Group '{group_name}' not found")
         
+        not_found = []
         for member in members:
-            member_dn = _find_user_dn(conn, member) or _find_group_dn(conn, member)
+            member_dn = _resolve_member_dn(conn, member)
             if not member_dn:
-                raise SambaToolError(f"Member '{member}' not found")
+                not_found.append(member)
+                continue
             try:
                 conn.modify_s(group_dn, [
                     (ldap.MOD_ADD, "member", [member_dn.encode("utf-8")])
                 ])
             except ldap.TYPE_OR_VALUE_EXISTS:
                 pass  # Already a member
-        
+        if not_found:
+            raise SambaToolError(f"Member(s) not found: {', '.join(not_found)}")
+
         return f"Members added to '{group_name}'"
     except ldap.LDAPError as e:
         desc = e.args[0].get("desc", str(e)) if e.args else str(e)
@@ -334,9 +358,11 @@ def remove_group_members(group_name: str, members: List[str]) -> str:
         if not group_dn:
             raise SambaToolError(f"Group '{group_name}' not found")
         
+        not_found = []
         for member in members:
-            member_dn = _find_user_dn(conn, member) or _find_group_dn(conn, member)
+            member_dn = _resolve_member_dn(conn, member)
             if not member_dn:
+                not_found.append(member)
                 continue
             try:
                 conn.modify_s(group_dn, [
@@ -344,7 +370,9 @@ def remove_group_members(group_name: str, members: List[str]) -> str:
                 ])
             except ldap.NO_SUCH_ATTRIBUTE:
                 pass  # Not a member
-        
+        if not_found:
+            raise SambaToolError(f"Member(s) not found: {', '.join(not_found)}")
+
         return f"Members removed from '{group_name}'"
     except ldap.LDAPError as e:
         desc = e.args[0].get("desc", str(e)) if e.args else str(e)
