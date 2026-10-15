@@ -113,9 +113,8 @@ export default function GroupsPage() {
     const handleRemoveMember = async (memberDN: string) => {
         if (!editingGroup) return;
         setMemberError('');
-        const username = extractCN(memberDN);
         try {
-            await groupsApi.removeMembers(editingGroup.name, [username]);
+            await groupsApi.removeMembers(editingGroup.name, [memberDN]);
             const updatedGroup = await groupsApi.get(editingGroup.name);
             setEditingGroup(updatedGroup);
             loadGroups(true);
