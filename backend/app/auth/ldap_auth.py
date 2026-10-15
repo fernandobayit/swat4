@@ -19,6 +19,45 @@ def get_admin_connection() -> ldap.ldapobject.LDAPObject:
     return conn
 
 
+def _escape_ldap_filter(value: str) -> str:
+    return value.replace("\\", "\\5c").replace("(", "\\28").replace(")", "\\29")
+
+
+def _expand_nested_groups(conn, group_dns: List[str]) -> List[str]:
+    """Retorna DNs de grupos ancestrais que contem (direta ou indiretamente)
+    os DNs informados.
+
+    O atributo memberOf NAO e transitivo no AD: se o usuario esta em
+    "Time-DEV" e "Time-DEV" e membro de "Account Operators", o memberOf do
+    usuario traz apenas "Time-DEV". Esta funcao sobe a cadeia de memberships
+    para que permissoes aninhadas sejam herdadas no login/RBAC.
+    """
+    seen = {d.lower() for d in group_dns}
+    queue = list(group_dns)
+    parents: List[str] = []
+    while queue:
+        current = queue.pop(0)
+        try:
+            result = conn.search_s(
+                settings.samba_base_dn, ldap.SCOPE_SUBTREE,
+                f"(&(objectClass=group)(member={_escape_ldap_filter(current)}))",
+                ["distinguishedName"],
+            )
+        except ldap.LDAPError:
+            continue
+        for dn, _entry in result:
+            if dn is None:
+                continue
+            dn_str = dn if isinstance(dn, str) else dn.decode("utf-8")
+            key = dn_str.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            parents.append(dn_str)
+            queue.append(dn_str)
+    return parents
+
+
 def authenticate_user(username: str, password: str) -> Optional[dict]:
     """Authenticate user via LDAP bind and return user info."""
     try:
@@ -61,6 +100,27 @@ def authenticate_user(username: str, password: str) -> Optional[dict]:
             for p in parts:
                 if p.startswith("CN="):
                     group_names.append(p[3:])
+                    break
+
+        # memberOf nao e transitivo: expande grupos aninhados (cadeia de
+        # memberships) usando conexao de servico, para herdar permissoes
+        # de grupos pai (ex.: Time-DEV -> Account Operators).
+        nested_dns = []
+        try:
+            admin_conn = get_admin_connection()
+            try:
+                nested_dns = _expand_nested_groups(admin_conn, list(member_of))
+            finally:
+                admin_conn.unbind_s()
+        except ldap.LDAPError:
+            logger.warning("Failed to expand nested groups; using direct memberships only")
+
+        for dn_str in nested_dns:
+            for p in dn_str.split(","):
+                if p.startswith("CN="):
+                    gname = p[3:]
+                    if gname not in group_names:
+                        group_names.append(gname)
                     break
         
         # Handle primary group (Domain Users = 513, Domain Admins = 512)
