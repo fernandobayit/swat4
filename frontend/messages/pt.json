@@ -81,7 +81,8 @@
         "createdAt": "Criado em",
         "resetPassword": "Redefinir Senha",
         "enableAccount": "Ativar Conta",
-        "disableAccount": "Desativar Conta"
+        "disableAccount": "Desativar Conta",
+        "ouDefault": "Padrão do domínio (CN=Users)"
     },
     "groups": {
         "title": "Gerenciamento de Grupos",
@@ -198,8 +199,8 @@
             "content": "(Exclusivo para Admins) Visão holística da saúde e das estatísticas do controlador de domínio."
         },
         "settings": {
-             "title": "Configurações Globais",
-             "content": "(Exclusivo para Admins) Edite as políticas de senha (comprimento, complexidade, validade) e os filtros avançados de visibilidade RBAC."
+            "title": "Configurações Globais",
+            "content": "(Exclusivo para Admins) Edite as políticas de senha (comprimento, complexidade, validade) e os filtros avançados de visibilidade RBAC."
         }
     }
 }

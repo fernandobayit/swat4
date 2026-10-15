@@ -78,7 +78,8 @@
         "createdAt": "Creado El",
         "resetPassword": "Restablecer Contraseña",
         "enableAccount": "Activar Cuenta",
-        "disableAccount": "Desactivar Cuenta"
+        "disableAccount": "Desactivar Cuenta",
+        "ouDefault": "Predeterminado del dominio (CN=Users)"
     },
     "groups": {
         "title": "Gestión de Grupos",

@@ -2,11 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
-import { users as usersApi, bulk as bulkApi } from '@/lib/api';
+import { users as usersApi, bulk as bulkApi, ous as ousApi } from '@/lib/api';
 import OUTree from '@/components/ou-tree';
 import { Plus, Pencil, Trash2, Search, UserCheck, UserX, X, FileUp } from 'lucide-react';
 import type { User } from '@/lib/types';
 import { cn } from '@/lib/utils';
+
+const flattenOus = (nodes: any[], depth = 0): { dn: string; label: string }[] =>
+    nodes.flatMap((n: any) => [
+        { dn: n.dn as string, label: '\u00A0'.repeat(depth * 4) + (n.name as string) },
+        ...flattenOus(n.children || [], depth + 1),
+    ]);
 
 const generateAutoUsername = (firstName: string, lastName: string) => {
     const f = firstName.trim().split(/\s+/)[0] || '';
@@ -28,11 +34,16 @@ export default function UsersPage() {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [formData, setFormData] = useState({ username: '', password: '', givenName: '', sn: '', email: '', ou: '' });
+    const [ouTree, setOuTree] = useState<any[]>([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [showBulkForm, setShowBulkForm] = useState(false);
     const [fileOptions, setFileOptions] = useState<File | null>(null);
     const [isUsernameEdited, setIsUsernameEdited] = useState(false); // Track if user manually changed it
+
+    useEffect(() => {
+        ousApi.tree().then((t: any[]) => setOuTree(t)).catch(() => {});
+    }, []);
 
     useEffect(() => { loadUsers(); }, [selectedOU]);
 
@@ -290,6 +301,16 @@ export default function UsersPage() {
                                 <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.email')}</label>
                                 <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.ou')}</label>
+                                <select value={formData.ou} onChange={(e) => setFormData({ ...formData, ou: e.target.value })}
+                                    className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
+                                    <option value="">{t('users.ouDefault')}</option>
+                                    {flattenOus(ouTree).map((o) => (
+                                        <option key={o.dn} value={o.dn}>{o.label}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.password')} *</label>

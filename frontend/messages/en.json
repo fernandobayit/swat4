@@ -78,7 +78,8 @@
         "createdAt": "Created At",
         "resetPassword": "Reset Password",
         "enableAccount": "Enable Account",
-        "disableAccount": "Disable Account"
+        "disableAccount": "Disable Account",
+        "ouDefault": "Domain default (CN=Users)"
     },
     "groups": {
         "title": "Group Management",
