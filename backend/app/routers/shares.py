@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
-from app.auth.rbac import require_role, require_permission
+from app.auth.rbac import require_role, require_permission, can_manage_share_folder
 from app.services import share_service
-from app.models.schemas import ShareCreate, ShareUpdate, ShareResponse
-from app.database import log_activity
+from app.models.schemas import ShareCreate, ShareUpdate, ShareResponse, ShareFolderCreate, ShareFolderInfo
+from app.database import log_activity, list_share_folders
 
 router = APIRouter()
+
+# Compartilhamentos: criacao/edicao/exclusao restritos a Domain Admins.
+# Account Operators permanecem apenas com leitura (listar/detalhar).
 
 
 @router.get("", response_model=List[ShareResponse])
@@ -35,9 +38,9 @@ async def get_share(
 @router.post("", response_model=dict)
 async def create_share(
     share: ShareCreate,
-    current_user: dict = Depends(require_permission("manage_shares")),
+    current_user: dict = Depends(require_role(["Domain Admins"])),
 ):
-    """Create a new file share."""
+    """Create a new file share (Domain Admins only)."""
     try:
         config = {
             "path": share.path,
@@ -60,9 +63,9 @@ async def create_share(
 async def update_share(
     name: str,
     share: ShareUpdate,
-    current_user: dict = Depends(require_permission("manage_shares")),
+    current_user: dict = Depends(require_role(["Domain Admins"])),
 ):
-    """Update an existing share."""
+    """Update an existing file share (Domain Admins only)."""
     try:
         config = {}
         if share.path is not None:
@@ -86,13 +89,69 @@ async def update_share(
 @router.delete("/{name}", response_model=dict)
 async def delete_share(
     name: str,
-    current_user: dict = Depends(require_permission("manage_shares")),
+    current_user: dict = Depends(require_role(["Domain Admins"])),
 ):
-    """Delete a file share."""
+    """Delete a file share (Domain Admins only; cascata subpastas e grupos)."""
     try:
         share_service.delete_share(name)
         log_activity(current_user.get("username", "system"), "DELETE", "Share", name, "Deleted file share")
         return {"message": "Share deleted successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Subpastas nivel 1 ─────────────────────────────────
+@router.get("/{name}/folders", response_model=List[ShareFolderInfo])
+async def list_folders(
+    name: str,
+    current_user: dict = Depends(require_role(["Domain Admins", "Account Operators"])),
+):
+    """List registered level-1 folders of a share."""
+    if share_service.get_share(name) is None:
+        raise HTTPException(status_code=404, detail="Share not found")
+    return list_share_folders(name)
+
+
+@router.post("/{name}/folders", response_model=dict)
+async def create_folder(
+    name: str,
+    body: ShareFolderCreate,
+    current_user: dict = Depends(require_permission("manage_shares")),
+):
+    """Create a level-1 folder with its own access groups.
+
+    Domain Admins always; Account Operators only in granted shares.
+    """
+    if not can_manage_share_folder(current_user, name):
+        raise HTTPException(status_code=403, detail="Sem permissao para criar subpastas neste compartilhamento")
+    try:
+        share_service.add_share_folder(name, body.folder, current_user.get("username", "system"))
+        log_activity(current_user.get("username", "system"), "CREATE", "ShareFolder", f"{name}/{body.folder}", f"Created level-1 folder with access groups")
+        return {"message": "Folder created successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{name}/folders/{folder}", response_model=dict)
+async def delete_folder(
+    name: str,
+    folder: str,
+    current_user: dict = Depends(require_permission("manage_shares")),
+):
+    """Delete a level-1 folder (pasta, grupos e registro).
+
+    Domain Admins always; Account Operators only in granted shares.
+    """
+    if not can_manage_share_folder(current_user, name):
+        raise HTTPException(status_code=403, detail="Sem permissao para excluir subpastas neste compartilhamento")
+    try:
+        share_service.delete_share_folder(name, folder)
+        log_activity(current_user.get("username", "system"), "DELETE", "ShareFolder", f"{name}/{folder}", "Deleted level-1 folder with access groups")
+        return {"message": "Folder deleted successfully"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

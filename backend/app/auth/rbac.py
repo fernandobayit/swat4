@@ -118,6 +118,21 @@ def can_view_dns(current_user: dict = Depends(get_current_user)):
     return False
 
 
+def can_manage_share_folder(current_user: dict, share_name: str) -> bool:
+    """Autorizacao para criar/excluir subpastas em compartilhamentos.
+
+    Domain Admins sempre podem; Account Operators apenas nos
+    compartilhamentos presentes em share_folders_grant do perfil.
+    O gate geral can_manage_shares permanece no router."""
+    groups = current_user.get("groups") or []
+    if ADMIN_ROLE in groups:
+        return True
+    if OPERATOR_ROLE in groups:
+        grant = get_role_settings(OPERATOR_ROLE).get("share_folders_grant") or []
+        return share_name in grant
+    return False
+
+
 def get_visible_ous(current_user: dict):
     """DNs de OUs visiveis (match de subarvore) ou None se irrestrito."""
     groups = current_user.get("groups") or []

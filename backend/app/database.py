@@ -40,6 +40,19 @@ def init_db():
             settings TEXT NOT NULL
         )
     """)
+
+    # Create the share_folders registry (subpastas nivel 1 por compartilhamento)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS share_folders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            share TEXT NOT NULL,
+            folder TEXT NOT NULL,
+            created_by TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(share, folder)
+        )
+    """)
+
     
     conn.commit()
     conn.close()
@@ -75,6 +88,54 @@ def set_role_settings(role_name: str, settings_dict: dict):
     except Exception as e:
         import logging
         logging.getLogger(__name__).error(f"Failed to save role settings: {e}")
+
+def add_share_folder_row(share: str, folder: str, created_by: str):
+    """Registra subpasta criada em um compartilhamento."""
+    try:
+        conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT OR IGNORE INTO share_folders (share, folder, created_by) VALUES (?, ?, ?)",
+            (share, folder, created_by),
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to register share folder: {e}")
+
+
+def list_share_folders(share: str) -> List[Dict[str, Any]]:
+    """Lista subpastas registradas de um compartilhamento."""
+    try:
+        conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT folder, created_by, created_at FROM share_folders WHERE share = ? ORDER BY folder",
+            (share,),
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to list share folders: {e}")
+        return []
+
+
+def delete_share_folder_row(share: str, folder: str):
+    """Remove o registro de uma subpasta."""
+    try:
+        conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM share_folders WHERE share = ? AND folder = ?", (share, folder))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to delete share folder row: {e}")
+
 
 def log_activity(username: str, action: str, entity_type: str, entity_name: str, details: str = ""):
     """Log an activity to SQLite database."""
