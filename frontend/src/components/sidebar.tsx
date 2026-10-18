@@ -22,6 +22,7 @@ import {
     HelpCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_VERSION, APP_BUILD_DATE } from '@/lib/version';
 import HelpModal from './help-modal';
 
 interface RolePermissions {
@@ -238,6 +239,13 @@ export default function Sidebar() {
                         {!collapsed && <span className="text-xs font-medium">{t('auth.logout')}</span>}
                     </button>
                 </div>
+                {collapsed ? (
+                    <div className="text-center text-[9px] text-accent/25 select-none">v{APP_VERSION}</div>
+                ) : (
+                    <div className="px-3 pt-1 text-[10px] text-accent/25 select-none">
+                        v{APP_VERSION} · {APP_BUILD_DATE}
+                    </div>
+                )}
             </div>
 
             <HelpModal isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
