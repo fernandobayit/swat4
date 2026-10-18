@@ -1,5 +1,6 @@
 'use client';
 
+import { shares as sharesApi } from '@/lib/api';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
@@ -41,6 +42,8 @@ export default function SettingsPage() {
         visible_groups_list: []
     });
     const [opSelectedOus, setOpSelectedOus] = useState<string[]>([]);
+    const [opShareList, setOpShareList] = useState<string[]>([]);
+    const [opSelectedShares, setOpSelectedShares] = useState<string[]>([]);
     const [opTree, setOpTree] = useState<OUNode[]>([]);
 
     useEffect(() => {
@@ -84,6 +87,8 @@ export default function SettingsPage() {
             ]);
             setOpProfile((prev: any) => ({ ...prev, ...(settings || {}) }));
             setOpSelectedOus(settings?.visible_ous || []);
+            setOpSelectedShares(settings?.share_folders_grant || []);
+            try { const sharesData = await sharesApi.list(); setOpShareList(sharesData.map((x: any) => x.name)); } catch {}
             setOpTree(tree || []);
         } catch (e: any) {
             setOpError(e.message || 'Error loading operator profile');
@@ -105,7 +110,8 @@ export default function SettingsPage() {
                 can_manage_users: !!opProfile.can_manage_users,
                 can_manage_groups: !!opProfile.can_manage_groups,
                 can_manage_shares: !!opProfile.can_manage_shares,
-                visible_ous: opSelectedOus
+                visible_ous: opSelectedOus,
+                share_folders_grant: opSelectedShares
             };
             await rolesApi.updateSettings('Account Operators', payload);
             setOpSuccess((t as any)('settings.opSaved') || 'Operator profile saved.');
@@ -339,6 +345,32 @@ export default function SettingsPage() {
                                     onChange={setOpSelectedOus}
                                 />
                                 <p className="text-xs text-accent/50">{(t as any)('settings.opVisibleOusHint') || 'Sem seleção, o operador visualiza todas as OUs.'}</p>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="col-span-1 md:col-span-2 space-y-2">
+                        <p className="font-medium text-sm text-accent">{(t as any)('settings.opShareFoldersGrant') || 'Subpastas permitidas (compartilhamentos)'}</p>
+                        {opLoading ? (
+                            <div className="flex items-center justify-center py-8 rounded-xl border border-border/40">
+                                <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                            </div>
+                        ) : (
+                            <>
+                                {opShareList.length === 0 && (
+                                    <p className="text-xs text-accent/50">{(t as any)('shares.noData') || 'Nenhum compartilhamento.'}</p>
+                                )}
+                                {opShareList.map((shareName) => (
+                                    <label key={shareName} className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border/30 hover:bg-surface/40 cursor-pointer">
+                                        <input type="checkbox" className="accent-[#0ABF16]"
+                                            checked={opSelectedShares.includes(shareName)}
+                                            onChange={(e) => setOpSelectedShares(e.target.checked
+                                                ? [...opSelectedShares, shareName]
+                                                : opSelectedShares.filter((x) => x !== shareName))} />
+                                        <span className="text-sm text-accent">{shareName}</span>
+                                    </label>
+                                ))}
+                                <p className="text-xs text-accent/50">{(t as any)('settings.opShareFoldersGrantHint') || 'Compartilhamentos em que o operador pode criar/excluir subpastas de nível 1.'}</p>
                             </>
                         )}
                     </div>

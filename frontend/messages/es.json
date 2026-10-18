@@ -111,7 +111,12 @@
         "browseable": "Navegable",
         "guestAccess": "Acceso de Invitado",
         "validUsers": "Usuarios Válidos",
-        "writeList": "Lista de Escritura"
+        "writeList": "Lista de Escritura",
+        "folders": "Subcarpetas",
+        "newFolder": "Nueva subcarpeta",
+        "addFolder": "Crear subcarpeta",
+        "noFolders": "Aún no hay subcarpetas.",
+        "foldersHint": "Las subcarpetas de nivel 1 crean automáticamente los grupos de seguridad Escritura y Lectura."
     },
     "logs": {
         "title": "Visor de Registros",
@@ -154,7 +159,9 @@
         "opVisibleOus": "OUs visibles",
         "opVisibleOusHint": "Sin selección, el operador ve todas las OUs.",
         "opSaved": "Perfil del operador guardado.",
-        "opSave": "Guardar perfil"
+        "opSave": "Guardar perfil",
+        "opShareFoldersGrant": "Subcarpetas permitidas (compartir)",
+        "opShareFoldersGrantHint": "Compartir donde el operador puede crear/eliminar subcarpetas de nivel 1."
     },
     "dns": {
         "title": "Gestión de DNS",
