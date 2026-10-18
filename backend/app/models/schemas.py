@@ -136,6 +136,16 @@ class ShareResponse(BaseModel):
     write_list: Optional[str] = None
 
 
+class ShareFolderCreate(BaseModel):
+    folder: str = Field(..., min_length=1, max_length=64)
+
+
+class ShareFolderInfo(BaseModel):
+    folder: str
+    created_by: str
+    created_at: str
+
+
 # ── OUs ───────────────────────────────────────────────
 class OUNode(BaseModel):
     dn: str
@@ -220,6 +230,7 @@ class RoleSettingsSchema(BaseModel):
     can_manage_groups: bool = True
     can_manage_shares: bool = True
     visible_ous: List[str] = []
+    share_folders_grant: List[str] = []
 
 # Rebuild models for forward references
 OUNode.model_rebuild()
