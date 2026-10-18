@@ -111,7 +111,12 @@
         "browseable": "Browseable",
         "guestAccess": "Guest Access",
         "validUsers": "Valid Users",
-        "writeList": "Write List"
+        "writeList": "Write List",
+        "folders": "Subfolders",
+        "newFolder": "New subfolder",
+        "addFolder": "Create subfolder",
+        "noFolders": "No subfolders yet.",
+        "foldersHint": "Level-1 subfolders automatically create the Write and Read access security groups."
     },
     "logs": {
         "title": "Log Viewer",
@@ -154,7 +159,9 @@
         "opVisibleOus": "Visible OUs",
         "opVisibleOusHint": "No selection = all OUs visible.",
         "opSaved": "Operator profile saved.",
-        "opSave": "Save profile"
+        "opSave": "Save profile",
+        "opShareFoldersGrant": "Allowed subfolders (shares)",
+        "opShareFoldersGrantHint": "Shares where the operator can create/delete level-1 subfolders."
     },
     "dns": {
         "title": "DNS Management",

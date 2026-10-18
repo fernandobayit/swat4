@@ -121,6 +121,12 @@ export const shares = {
         apiRequest<any>(`/shares/${name}`, { method: 'PUT', body: data }),
     delete: (name: string) =>
         apiRequest<any>(`/shares/${name}`, { method: 'DELETE' }),
+    folders: (name: string) =>
+        apiRequest<any[]>(`/shares/${name}/folders`),
+    createFolder: (name: string, folder: string) =>
+        apiRequest<any>(`/shares/${name}/folders`, { method: 'POST', body: { folder } }),
+    deleteFolder: (name: string, folder: string) =>
+        apiRequest<any>(`/shares/${name}/folders/${encodeURIComponent(folder)}`, { method: 'DELETE' }),
 };
 
 // ── OUs ──────────────────────────────────────────
