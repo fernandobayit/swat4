@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useTranslation, localeNames, localeFlags } from '@/lib/i18n';
+import { useToast } from '@/lib/toast';
 import { Shield, Eye, EyeOff, Globe, ChevronDown } from 'lucide-react';
 
 export default function LoginPage() {
@@ -15,6 +16,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const { showToast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [showLangMenu, setShowLangMenu] = useState(false);
 
@@ -28,11 +30,11 @@ export default function LoginPage() {
             router.push('/dashboard');
         } catch (err: any) {
             if (err.status === 401) {
-                setError(t('auth.invalidCredentials'));
+                showToast({ title: t('auth.login') || 'Login', description: t('auth.invalidCredentials'), variant: 'error', duration: 7000 });
             } else if (err.status === 403) {
-                setError(t('auth.notAuthorized'));
+                showToast({ title: t('auth.login') || 'Login', description: t('auth.notAuthorized'), variant: 'error', duration: 7000 });
             } else {
-                setError(err.message || t('common.error'));
+                showToast({ title: 'Erro', description: err.message || t('common.error'), variant: 'error', duration: 7000 });
             }
         } finally {
             setIsLoading(false);
@@ -97,11 +99,7 @@ export default function LoginPage() {
                     </div>
 
                     {/* Error */}
-                    {error && (
-                        <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm animate-fade-in">
-                            {error}
-                        </div>
-                    )}
+
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">

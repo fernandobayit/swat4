@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/lib/toast';
 import { users as usersApi, bulk as bulkApi, ous as ousApi } from '@/lib/api';
 import OUTree from '@/components/ou-tree';
 import { Plus, Pencil, Trash2, Search, UserCheck, UserX, X, FileUp } from 'lucide-react';
@@ -27,6 +28,7 @@ const generateAutoUsername = (firstName: string, lastName: string) => {
 
 export default function UsersPage() {
     const { t } = useTranslation();
+    const { showToast } = useToast();
     const [userList, setUserList] = useState<User[]>([]);
     const [selectedOU, setSelectedOU] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -70,7 +72,7 @@ export default function UsersPage() {
             setShowCreateForm(false);
             setFormData({ username: '', password: '', givenName: '', sn: '', email: '', ou: '' });
             setIsUsernameEdited(false);
-        } catch (e: any) { setError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
         finally { setSaving(false); }
     };
 
@@ -86,14 +88,14 @@ export default function UsersPage() {
             await usersApi.delete(username);
             await loadUsers(true);
             setDeletingUser(null);
-        } catch (e: any) { setError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
     };
 
     const handleToggleEnable = async (user: User) => {
         try {
             await usersApi.update(user.username, { enabled: !user.enabled });
             await loadUsers(true);
-        } catch (e: any) { setError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
     };
 
     const [editFormData, setEditFormData] = useState({ givenName: '', sn: '', displayName: '', email: '', password: '' });
@@ -122,7 +124,7 @@ export default function UsersPage() {
             await usersApi.update(editingUser.username, data);
             await loadUsers(true);
             setEditingUser(null);
-        } catch (e: any) { setError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
         finally { setSaving(false); }
     };
 
@@ -146,12 +148,6 @@ export default function UsersPage() {
                 </div>
             </div>
 
-            {error && (
-                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex justify-between items-center animate-fade-in">
-                    <span>{error}</span>
-                    <button onClick={() => setError('')}><X size={14} /></button>
-                </div>
-            )}
 
             <div className="flex gap-5">
                 {/* OU Tree */}
@@ -413,7 +409,7 @@ export default function UsersPage() {
                                     alert(result.message);
                                     setShowBulkForm(false);
                                     setFileOptions(null);
-                                } catch (e: any) { setError(e.message); }
+                                } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
                                 finally { setSaving(false); }
                             }} disabled={saving || !fileOptions}
                                 className="flex-1 px-4 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent-light active:scale-95 disabled:opacity-50 transition-smooth">

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/lib/toast';
 import { useAuth } from '@/lib/auth';
 import { shares as sharesApi } from '@/lib/api';
 import { Plus, Pencil, Trash2, Search, HardDrive, X, FolderPlus, Folder, FolderMinus } from 'lucide-react';
@@ -15,6 +16,7 @@ interface ShareFolderRow {
 
 export default function SharesPage() {
     const { t } = useTranslation();
+    const { showToast } = useToast();
     const { user } = useAuth();
     const isDomainAdmin = (user?.groups || []).includes('Domain Admins');
 
@@ -60,7 +62,7 @@ export default function SharesPage() {
         try {
             setFoldersList(await sharesApi.folders(shareName));
         } catch (e: any) {
-            setFolderError(e.message || 'Error');
+            showToast({ title: t('common.error') || 'Erro', description: e.message || 'Error', variant: 'error', duration: 7000 });
             setFoldersList([]);
         } finally {
             setFoldersLoading(false);
@@ -75,7 +77,7 @@ export default function SharesPage() {
             setNewFolder('');
             setFoldersList(await sharesApi.folders(foldersShare));
         } catch (e: any) {
-            setFolderError(e.message || 'Error');
+            showToast({ title: t('common.error') || 'Erro', description: e.message || 'Error', variant: 'error', duration: 7000 });
         } finally {
             setFolderSaving(false);
         }
@@ -93,7 +95,7 @@ export default function SharesPage() {
             setDeletingFolder(null);
             setFoldersList(await sharesApi.folders(foldersShare));
         } catch (e: any) {
-            setFolderError(e.message || 'Error');
+            showToast({ title: t('common.error') || 'Erro', description: e.message || 'Error', variant: 'error', duration: 7000 });
         }
     };
 
@@ -121,7 +123,7 @@ export default function SharesPage() {
             setShowCreateForm(false);
             setEditingShare(null);
             setFormData({ name: '', path: '', comment: '', veto_files: '', write_list: '' });
-        } catch (e: any) { setError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
         finally { setSaving(false); }
     };
 
@@ -153,12 +155,6 @@ export default function SharesPage() {
                 )}
             </div>
 
-            {error && (
-                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex justify-between items-center animate-fade-in">
-                    <span>{error}</span>
-                    <button onClick={() => setError('')}><X size={14} /></button>
-                </div>
-            )}
 
             <div className="mb-4 relative">
                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-accent/30" />
@@ -254,12 +250,7 @@ export default function SharesPage() {
                             <button onClick={() => setFoldersShare(null)} className="p-1.5 rounded-lg hover:bg-surface transition-smooth"><X size={18} /></button>
                         </div>
 
-                        {folderError && (
-                            <div className="mb-3 p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex justify-between items-center">
-                                <span>{folderError}</span>
-                                <button onClick={() => setFolderError('')}><X size={14} /></button>
-                            </div>
-                        )}
+
 
                         <div className="flex gap-2 mb-4">
                             <input value={newFolder} onChange={(e) => setNewFolder(e.target.value)}
