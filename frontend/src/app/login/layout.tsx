@@ -10,9 +10,9 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
         <I18nProvider>
             <AuthProvider>
                 <ToastProvider>
-                {children}
-            </AuthProvider>
+                    {children}
                 </ToastProvider>
+            </AuthProvider>
         </I18nProvider>
     );
 }

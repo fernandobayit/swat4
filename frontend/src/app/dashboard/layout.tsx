@@ -46,9 +46,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <I18nProvider>
             <AuthProvider>
                 <ToastProvider>
-                <DashboardShell>{children}</DashboardShell>
-            </AuthProvider>
+                    <DashboardShell>{children}</DashboardShell>
                 </ToastProvider>
+            </AuthProvider>
         </I18nProvider>
     );
 }
