@@ -43,10 +43,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
     const value = useMemo(() => ({ showToast }), [showToast]);
 
-    const iconFor = (v: ToastItem['variant'])
-        => v === 'success' ? <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
-        : v === 'error' ? <AlertTriangle size={16} className="text-red-500 flex-shrink-0" />
-        : <Info size={16} className="text-blue-500 flex-shrink-0" />;
+    const iconFor = (v: ToastItem['variant']) => v === 'success' ? <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" /> : v === 'error' ? <AlertTriangle size={16} className="text-red-500 flex-shrink-0" /> : <Info size={16} className="text-blue-500 flex-shrink-0" />;
 
     return (
         <ToastContext.Provider value={value}>
