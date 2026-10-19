@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/lib/toast';
 import { groups as groupsApi, users as usersApi, bulk as bulkApi } from '@/lib/api';
 import OUTree from '@/components/ou-tree';
 import { Plus, Pencil, Trash2, Search, Users, X, UserPlus, UserMinus, FileUp } from 'lucide-react';
@@ -9,6 +10,7 @@ import type { Group, User } from '@/lib/types';
 
 export default function GroupsPage() {
     const { t } = useTranslation();
+    const { showToast } = useToast();
     const [groupList, setGroupList] = useState<Group[]>([]);
     const [selectedOU, setSelectedOU] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ export default function GroupsPage() {
             await groupsApi.create({ ...formData, group_type: 'Security' });
             await loadGroups(true);
             setShowCreateForm(false); setFormData({ name: '', description: '', ou: '' });
-        } catch (e: any) { setError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
         finally { setSaving(false); }
     };
 
@@ -58,7 +60,7 @@ export default function GroupsPage() {
             await groupsApi.delete(name);
             await loadGroups(true);
             setDeletingGroup(null);
-        } catch (e: any) { setError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
     };
 
     // ── Edit Group Modal State ──
@@ -93,7 +95,7 @@ export default function GroupsPage() {
             await groupsApi.update(editingGroup.name, { description: editDescription });
             await loadGroups(true);
             setEditingGroup(null);
-        } catch (e: any) { setError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
         finally { setSaving(false); }
     };
 
@@ -107,7 +109,7 @@ export default function GroupsPage() {
             setEditingGroup(updatedGroup);
             setMemberSearch('');
             loadGroups(true);
-        } catch (e: any) { setMemberError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
     };
 
     const handleRemoveMember = async (memberDN: string) => {
@@ -118,7 +120,7 @@ export default function GroupsPage() {
             const updatedGroup = await groupsApi.get(editingGroup.name);
             setEditingGroup(updatedGroup);
             loadGroups(true);
-        } catch (e: any) { setMemberError(e.message); }
+        } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
     };
 
     // Filter available users: those not already in this group
@@ -145,12 +147,6 @@ export default function GroupsPage() {
                 </div>
             </div>
 
-            {error && (
-                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex justify-between items-center animate-fade-in">
-                    <span>{error}</span>
-                    <button onClick={() => setError('')}><X size={14} /></button>
-                </div>
-            )}
 
             <div className="flex gap-5">
                 <div className="w-[280px] flex-shrink-0">
@@ -275,12 +271,7 @@ export default function GroupsPage() {
                             <button onClick={() => setEditingGroup(null)} className="p-1.5 rounded-lg hover:bg-surface transition-smooth"><X size={18} /></button>
                         </div>
 
-                        {memberError && (
-                            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex justify-between items-center animate-fade-in">
-                                <span>{memberError}</span>
-                                <button onClick={() => setMemberError('')}><X size={14} /></button>
-                            </div>
-                        )}
+
 
                         {/* Description */}
                         <div className="mb-5">
@@ -416,7 +407,7 @@ export default function GroupsPage() {
                                     alert(result.message);
                                     setShowBulkForm(false);
                                     setFileOptions(null);
-                                } catch (e: any) { setError(e.message); }
+                                } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
                                 finally { setSaving(false); }
                             }} disabled={saving || !fileOptions}
                                 className="flex-1 px-4 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent-light active:scale-95 disabled:opacity-50 transition-smooth">

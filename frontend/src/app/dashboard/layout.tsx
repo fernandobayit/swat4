@@ -6,6 +6,7 @@ import { I18nProvider } from '@/lib/i18n';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { isAuthenticated } from '@/lib/api';
 import Sidebar from '@/components/sidebar';
+import { ToastProvider } from '@/lib/toast';
 
 function DashboardShell({ children }: { children: React.ReactNode }) {
     const { isLoading } = useAuth();
@@ -44,8 +45,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <I18nProvider>
             <AuthProvider>
+                <ToastProvider>
                 <DashboardShell>{children}</DashboardShell>
             </AuthProvider>
+                </ToastProvider>
         </I18nProvider>
     );
 }

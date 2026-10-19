@@ -3,6 +3,7 @@
 import { shares as sharesApi } from '@/lib/api';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/lib/toast';
 import { useAuth } from '@/lib/auth';
 import { domain as domainApi, roles as rolesApi, ous as ousApi } from '@/lib/api';
 import { ShieldAlert, Save, X, Users } from 'lucide-react';
@@ -11,6 +12,7 @@ import type { OUNode } from '@/lib/types';
 
 export default function SettingsPage() {
     const { t } = useTranslation();
+    const { showToast } = useToast();
     const { user } = useAuth();
     const isDomainAdmin = user?.groups?.includes('Domain Admins') ?? false;
     const [loading, setLoading] = useState(true);
@@ -57,7 +59,7 @@ export default function SettingsPage() {
             const data = await domainApi.getPasswordPolicy();
             setPolicy(data);
         } catch (e: any) {
-            setError(e.message || 'Error loading settings');
+            showToast({ title: 'Erro', description: e.message || 'Error loading settings', variant: 'error', duration: 7000 });
         } finally {
             setLoading(false);
         }
@@ -70,9 +72,9 @@ export default function SettingsPage() {
         setSuccess('');
         try {
             await domainApi.updatePasswordPolicy(policy);
-            setSuccess(t('common.success') || 'Settings saved');
+            showToast({ title: t('common.success') || 'Sucesso', description: t('common.success') || 'Settings saved', variant: 'success' });
         } catch (e: any) {
-            setError(e.message || 'Error saving settings');
+            showToast({ title: 'Erro', description: e.message || 'Error saving settings', variant: 'error', duration: 7000 });
         } finally {
             setSaving(false);
         }
@@ -91,7 +93,7 @@ export default function SettingsPage() {
             try { const sharesData = await sharesApi.list(); setOpShareList(sharesData.map((x: any) => x.name)); } catch {}
             setOpTree(tree || []);
         } catch (e: any) {
-            setOpError(e.message || 'Error loading operator profile');
+            showToast({ title: 'Erro', description: e.message || 'Error loading operator profile', variant: 'error', duration: 7000 });
         } finally {
             setOpLoading(false);
         }
@@ -114,9 +116,9 @@ export default function SettingsPage() {
                 share_folders_grant: opSelectedShares
             };
             await rolesApi.updateSettings('Account Operators', payload);
-            setOpSuccess((t as any)('settings.opSaved') || 'Operator profile saved.');
+            showToast({ title: t('common.success') || 'Sucesso', description: (t as any)('settings.opSaved') || 'Operator profile saved.', variant: 'success' });
         } catch (e: any) {
-            setOpError(e.message || 'Error saving operator profile');
+            showToast({ title: 'Erro', description: e.message || 'Error saving operator profile', variant: 'error', duration: 7000 });
         } finally {
             setOpSaving(false);
         }
@@ -149,19 +151,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-accent/60 mt-1">{t('settings.subtitle')}</p>
             </div>
 
-            {error && (
-                <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex justify-between items-center">
-                    <span className="flex items-center gap-2"><ShieldAlert size={16} /> {error}</span>
-                    <button onClick={() => setError('')}><X size={14} /></button>
-                </div>
-            )}
 
-            {success && (
-                <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex justify-between items-center">
-                    <span>{success}</span>
-                    <button onClick={() => setSuccess('')}><X size={14} /></button>
-                </div>
-            )}
 
             <form onSubmit={handleSave} className="bg-white rounded-2xl border border-border/40 shadow-card overflow-hidden">
                 <div className="p-6 border-b border-border/20">
@@ -258,19 +248,7 @@ export default function SettingsPage() {
                 </div>
             </form>
 
-            {opError && (
-                <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex justify-between items-center">
-                    <span className="flex items-center gap-2"><ShieldAlert size={16} /> {opError}</span>
-                    <button type="button" onClick={() => setOpError('')}><X size={14} /></button>
-                </div>
-            )}
 
-            {opSuccess && (
-                <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex justify-between items-center">
-                    <span>{opSuccess}</span>
-                    <button type="button" onClick={() => setOpSuccess('')}><X size={14} /></button>
-                </div>
-            )}
 
             <form onSubmit={handleOpSave} className="bg-white rounded-2xl border border-border/40 shadow-card overflow-hidden mt-8">
                 <div className="p-6 border-b border-border/20">
