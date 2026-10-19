@@ -10,6 +10,7 @@ interface ToastItem {
     title: string;
     description?: string;
     variant: 'success' | 'error' | 'info';
+    duration?: number;
 }
 
 interface ToastContextValue {
@@ -34,6 +35,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             title: opts.title,
             description: opts.description,
             variant: opts.variant || 'info',
+            duration: opts.duration,
         };
         setItems((prev) => [...prev, item]);
         window.setTimeout(() => {
