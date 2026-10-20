@@ -149,6 +149,28 @@ def enable_user(username: str) -> str:
         conn.unbind_s()
 
 
+def set_pwd_last_set(username: str, value: int) -> str:
+    """Set pwdLastSet: 0 = exigir troca de senha no proximo logon.
+
+    No AD, pwdLastSet=0 marca o usuario para alterar a senha no proximo
+    logon interativo (banner de troca aparece automaticamente).
+    """
+    conn = get_admin_connection()
+    try:
+        user_dn = _find_user_dn(conn, username)
+        if not user_dn:
+            raise SambaToolError(f"User '{username}' not found")
+        conn.modify_s(user_dn, [
+            (ldap.MOD_REPLACE, "pwdLastSet", [str(value).encode("utf-8")]),
+        ])
+        return f"pwdLastSet={value} set for '{username}'"
+    except ldap.LDAPError as e:
+        desc = e.args[0].get("desc", str(e)) if e.args else str(e)
+        raise SambaToolError(f"Failed to set pwdLastSet: {desc}")
+    finally:
+        conn.unbind_s()
+
+
 def set_password(username: str, password: str) -> str:
     """Set/reset user password via LDAP."""
     conn = get_admin_connection()

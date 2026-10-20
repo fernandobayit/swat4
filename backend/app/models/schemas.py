@@ -45,6 +45,7 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     enabled: Optional[bool] = None
     password: Optional[str] = None
+    change_password_next_logon: Optional[bool] = None
 
     class Config:
         populate_by_name = True
