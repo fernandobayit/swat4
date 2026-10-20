@@ -232,6 +232,7 @@ class RoleSettingsSchema(BaseModel):
     can_manage_shares: bool = True
     visible_ous: List[str] = []
     share_folders_grant: List[str] = []
+    default_create_ou: str = ""
 
 # Rebuild models for forward references
 OUNode.model_rebuild()

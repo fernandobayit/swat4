@@ -79,7 +79,8 @@
         "resetPassword": "Restablecer Contraseña",
         "enableAccount": "Activar Cuenta",
         "disableAccount": "Desactivar Cuenta",
-        "ouDefault": "Predeterminado del dominio (CN=Users)"
+        "ouDefault": "Predeterminado del dominio (CN=Users)",
+        "ouDefaultProfile": "Predeterminado del perfil (Domain Admins)"
     },
     "groups": {
         "title": "Gestión de Grupos",
@@ -161,7 +162,12 @@
         "opSaved": "Perfil del operador guardado.",
         "opSave": "Guardar perfil",
         "opShareFoldersGrant": "Subcarpetas permitidas (compartir)",
-        "opShareFoldersGrantHint": "Compartir donde el operador puede crear/eliminar subcarpetas de nivel 1."
+        "opShareFoldersGrantHint": "Compartir donde el operador puede crear/eliminar subcarpetas de nivel 1.",
+        "defaultOuTitle": "OU predeterminada para nuevos usuarios",
+        "defaultOuSubtitle": "Define dónde se colocan los usuarios creados sin OU explícita (perfil Domain Admins).",
+        "defaultOuNone": "Sin predeterminado (carpeta Users del dominio)",
+        "defaultOuSave": "Guardar OU predeterminada",
+        "defaultOuSaved": "OU predeterminada guardada con éxito."
     },
     "dns": {
         "title": "Gestión de DNS",

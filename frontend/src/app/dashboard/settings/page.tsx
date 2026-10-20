@@ -10,6 +10,13 @@ import { ShieldAlert, Save, X, Users } from 'lucide-react';
 import OUCheckboxTree from '@/components/ou-checkbox-tree';
 import type { OUNode } from '@/lib/types';
 
+
+const flattenOusLocal = (nodes: any[], depth = 0): { dn: string; label: string }[] =>
+    nodes.flatMap((n: any) => [
+        { dn: n.dn as string, label: '\u00A0'.repeat(depth * 4) + (n.name as string) },
+        ...flattenOusLocal(n.children || [], depth + 1),
+    ]);
+
 export default function SettingsPage() {
     const { t } = useTranslation();
     const { showToast } = useToast();
@@ -47,10 +54,13 @@ export default function SettingsPage() {
     const [opShareList, setOpShareList] = useState<string[]>([]);
     const [opSelectedShares, setOpSelectedShares] = useState<string[]>([]);
     const [opTree, setOpTree] = useState<OUNode[]>([]);
+    const [adminOu, setAdminOu] = useState('');
+    const [adminSaving, setAdminSaving] = useState(false);
 
     useEffect(() => {
         loadData();
         loadOperatorProfile();
+        loadAdminProfile();
     }, []);
 
     const loadData = async () => {
@@ -121,6 +131,25 @@ export default function SettingsPage() {
             showToast({ title: 'Erro', description: e.message || 'Error saving operator profile', variant: 'error', duration: 7000 });
         } finally {
             setOpSaving(false);
+        }
+    };
+
+    const loadAdminProfile = async () => {
+        try {
+            const st = await rolesApi.getSettings('Domain Admins');
+            setAdminOu(st?.default_create_ou || '');
+        } catch {};
+    };
+
+    const handleAdminSave = async () => {
+        setAdminSaving(true);
+        try {
+            await rolesApi.updateSettings('Domain Admins', { default_create_ou: adminOu });
+            showToast({ title: t('common.success') || 'Sucesso', description: (t as any)('settings.defaultOuSaved') || 'OU padrão salva.', variant: 'success' });
+        } catch (e: any) {
+            showToast({ title: 'Erro', description: e.message || 'Error saving default OU', variant: 'error', duration: 7000 });
+        } finally {
+            setAdminSaving(false);
         }
     };
 
@@ -249,6 +278,33 @@ export default function SettingsPage() {
             </form>
 
 
+
+            <form onSubmit={(e) => { e.preventDefault(); handleAdminSave(); }} className="bg-white rounded-2xl border border-border/40 shadow-card overflow-hidden mt-8">
+                <div className="p-6 border-b border-border/20">
+                    <div className="flex items-center gap-2.5 mb-1">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Users size={16} className="text-primary-dark" />
+                        </div>
+                        <h2 className="text-lg font-semibold text-accent">{(t as any)('settings.defaultOuTitle') || 'OU padrão para novos usuários'}</h2>
+                    </div>
+                    <p className="text-xs text-accent/50">{(t as any)('settings.defaultOuSubtitle') || 'Define onde usuários criados sem OU explícita serão colocados (perfil Domain Admins).'}</p>
+                </div>
+                <div className="p-6">
+                    <select value={adminOu} onChange={(e) => setAdminOu(e.target.value)}
+                        className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
+                        <option value="">{(t as any)('settings.defaultOuNone') || 'Sem padrão (pasta Users do domínio)'}</option>
+                        {flattenOusLocal(opTree).map((o) => (
+                            <option key={o.dn} value={o.dn}>{o.label}</option>
+                        ))}
+                    </select>
+                    <div className="flex justify-end mt-4">
+                        <button type="submit" disabled={adminSaving}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent-light active:scale-95 disabled:opacity-50 transition-all shadow-sm">
+                            <Save size={16} /> {adminSaving ? t('common.loading') : ((t as any)('settings.defaultOuSave') || 'Salvar OU padrão')}
+                        </button>
+                    </div>
+                </div>
+            </form>
 
             <form onSubmit={handleOpSave} className="bg-white rounded-2xl border border-border/40 shadow-card overflow-hidden mt-8">
                 <div className="p-6 border-b border-border/20">
