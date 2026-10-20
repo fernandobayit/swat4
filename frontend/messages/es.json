@@ -80,7 +80,8 @@
         "enableAccount": "Activar Cuenta",
         "disableAccount": "Desactivar Cuenta",
         "ouDefault": "Predeterminado del dominio (CN=Users)",
-        "ouDefaultProfile": "Predeterminado del perfil (Domain Admins)"
+        "ouDefaultProfile": "Predeterminado del perfil (Domain Admins)",
+        "changePwdNext": "Cambiar contraseña en el próximo inicio de sesión"
     },
     "groups": {
         "title": "Gestión de Grupos",

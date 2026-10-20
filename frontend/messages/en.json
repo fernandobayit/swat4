@@ -80,7 +80,8 @@
         "enableAccount": "Enable Account",
         "disableAccount": "Disable Account",
         "ouDefault": "Domain default (CN=Users)",
-        "ouDefaultProfile": "Profile default (Domain Admins)"
+        "ouDefaultProfile": "Profile default (Domain Admins)",
+        "changePwdNext": "Change password at next logon"
     },
     "groups": {
         "title": "Group Management",

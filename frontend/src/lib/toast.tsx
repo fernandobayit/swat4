@@ -55,6 +55,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 duration={5000}
                 label="Notificação"
             >
+                <ToastPrimitive.Viewport
+                    className={cn(
+                        'fixed top-4 right-4 z-[100] w-[360px] max-w-[calc(100vw-2rem)]',
+                        'flex flex-col gap-2 outline-none',
+                    )}
+                />
                 {items.map((item) => (
                     <ToastPrimitive.Root
                         key={item.id}
@@ -62,8 +68,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                         duration={item.duration ?? 5000}
                         onOpenChange={(open) => { if (!open) setItems((prev) => prev.filter((x) => x.id !== item.id)); }}
                         className={cn(
-                            'fixed top-4 right-4 z-[100] w-[340px] max-w-[calc(100vw-2rem)]',
-                            'rounded-xl border bg-white shadow-modal p-3.5 flex items-start gap-2.5',
+                            'w-full rounded-xl border bg-white shadow-modal p-3.5 flex items-start gap-2.5',
                             'data-[state=open]:animate-in data-[state=closed]:animate-out',
                             item.variant === 'error' ? 'border-red-200 bg-red-50' : undefined,
                             item.variant === 'success' ? 'border-emerald-200 bg-emerald-50' : undefined,
