@@ -83,7 +83,8 @@
         "enableAccount": "Ativar Conta",
         "disableAccount": "Desativar Conta",
         "ouDefault": "Padrão do domínio (CN=Users)",
-        "ouDefaultProfile": "Padrão do perfil (Domain Admins)"
+        "ouDefaultProfile": "Padrão do perfil (Domain Admins)",
+        "changePwdNext": "Alterar senha no próximo logon"
     },
     "groups": {
         "title": "Gerenciamento de Grupos",
