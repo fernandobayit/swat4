@@ -107,7 +107,8 @@ export default function UsersPage() {
             displayName: user.display_name || '',
             email: user.email || '',
             password: '',
-        , changePasswordNextLogon: false });
+            changePasswordNextLogon: false,
+        });
         setEditingUser(user);
     };
 
