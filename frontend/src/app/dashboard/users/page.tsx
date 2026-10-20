@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { useToast } from '@/lib/toast';
-import { users as usersApi, bulk as bulkApi, ous as ousApi } from '@/lib/api';
+import { users as usersApi, bulk as bulkApi, ous as ousApi , roles as rolesApi } from '@/lib/api';
 import OUTree from '@/components/ou-tree';
 import { Plus, Pencil, Trash2, Search, UserCheck, UserX, X, FileUp } from 'lucide-react';
 import type { User } from '@/lib/types';
@@ -37,6 +37,7 @@ export default function UsersPage() {
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [formData, setFormData] = useState({ username: '', password: '', givenName: '', sn: '', email: '', ou: '' });
     const [ouTree, setOuTree] = useState<any[]>([]);
+    const [defaultCreateOu, setDefaultCreateOu] = useState('');
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [showBulkForm, setShowBulkForm] = useState(false);
@@ -45,6 +46,9 @@ export default function UsersPage() {
 
     useEffect(() => {
         ousApi.tree().then((t: any[]) => setOuTree(t)).catch(() => {});
+        rolesApi.getSettings('Domain Admins')
+            .then((st: any) => setDefaultCreateOu(st?.default_create_ou || ''))
+            .catch(() => {});
     }, []);
 
     useEffect(() => { loadUsers(); }, [selectedOU]);
@@ -70,7 +74,7 @@ export default function UsersPage() {
             await usersApi.create(formData);
             await loadUsers(true);
             setShowCreateForm(false);
-            setFormData({ username: '', password: '', givenName: '', sn: '', email: '', ou: '' });
+            setFormData({ username: '', password: '', givenName: '', sn: '', email: '', ou: defaultCreateOu || '' });
             setIsUsernameEdited(false);
         } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
         finally { setSaving(false); }
@@ -141,7 +145,7 @@ export default function UsersPage() {
                     </button>
                     <button onClick={() => {
                         setShowCreateForm(true);
-                        setFormData({ username: '', password: '', givenName: '', sn: '', email: '', ou: '' });
+                        setFormData({ username: '', password: '', givenName: '', sn: '', email: '', ou: defaultCreateOu || '' });
                         setIsUsernameEdited(false);
                     }}
                         className="flex items-center gap-2 px-4 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent-light active:scale-95 transition-smooth shadow-sm">
@@ -304,7 +308,9 @@ export default function UsersPage() {
                                 <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.ou')}</label>
                                 <select value={formData.ou} onChange={(e) => setFormData({ ...formData, ou: e.target.value })}
                                     className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
-                                    <option value="">{t('users.ouDefault')}</option>
+                                    {defaultCreateOu
+                                        ? <option value={defaultCreateOu}>{t('users.ouDefaultProfile')}</option>
+                                        : <option value="">{t('users.ouDefault')}</option>}
                                     {flattenOus(ouTree).map((o) => (
                                         <option key={o.dn} value={o.dn}>{o.label}</option>
                                     ))}

@@ -6,7 +6,7 @@ from app.services import ldap_service
 from app.services import samba_tool
 from app.models.schemas import UserCreate, UserUpdate, UserResponse
 from app.exceptions import SambaToolError
-from app.database import log_activity
+from app.database import log_activity, get_role_settings
 
 router = APIRouter()
 
@@ -52,7 +52,14 @@ async def create_user(
     if user.ou:
         parent_dn = user.ou if "DC=" in user.ou else f"{user.ou},{settings.samba_base_dn}"
     else:
-        parent_dn = f"CN=Users,{settings.samba_base_dn}"
+        # OU padrao definida no perfil de Domain Admins (default_create_ou);
+        # fallback para CN=Users quando nao configurada.
+        admin_settings = get_role_settings("Domain Admins")
+        default_ou = (admin_settings.get("default_create_ou") or "").strip()
+        if default_ou:
+            parent_dn = default_ou if "DC=" in default_ou else f"{default_ou},{settings.samba_base_dn}"
+        else:
+            parent_dn = f"CN=Users,{settings.samba_base_dn}"
 
     if not is_ou_visible(parent_dn, visible):
         raise HTTPException(status_code=403, detail="OU fora das OUs visiveis do perfil")

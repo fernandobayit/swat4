@@ -79,7 +79,8 @@
         "resetPassword": "Reset Password",
         "enableAccount": "Enable Account",
         "disableAccount": "Disable Account",
-        "ouDefault": "Domain default (CN=Users)"
+        "ouDefault": "Domain default (CN=Users)",
+        "ouDefaultProfile": "Profile default (Domain Admins)"
     },
     "groups": {
         "title": "Group Management",
@@ -161,7 +162,12 @@
         "opSaved": "Operator profile saved.",
         "opSave": "Save profile",
         "opShareFoldersGrant": "Allowed subfolders (shares)",
-        "opShareFoldersGrantHint": "Shares where the operator can create/delete level-1 subfolders."
+        "opShareFoldersGrantHint": "Shares where the operator can create/delete level-1 subfolders.",
+        "defaultOuTitle": "Default OU for new users",
+        "defaultOuSubtitle": "Defines where users created without explicit OU are placed (Domain Admins profile).",
+        "defaultOuNone": "No default (domain Users folder)",
+        "defaultOuSave": "Save default OU",
+        "defaultOuSaved": "Default OU saved successfully."
     },
     "dns": {
         "title": "DNS Management",
