@@ -97,6 +97,10 @@ async def update_user(
         if user.password:
             samba_tool.set_password(username, user.password)
 
+        if user.change_password_next_logon is True:
+            samba_tool.set_pwd_last_set(username, 0)
+            log_activity(current_user.get("username", "system"), "UPDATE", "User", username, "Password change required at next logon")
+
         attrs_to_update = {}
         if user.given_name is not None:
             attrs_to_update["givenName"] = user.given_name

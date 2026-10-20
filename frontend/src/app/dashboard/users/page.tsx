@@ -98,7 +98,7 @@ export default function UsersPage() {
         } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
     };
 
-    const [editFormData, setEditFormData] = useState({ givenName: '', sn: '', displayName: '', email: '', password: '' });
+    const [editFormData, setEditFormData] = useState({ givenName: '', sn: '', displayName: '', email: '', password: '', changePasswordNextLogon: false });
 
     const openEditModal = (user: User) => {
         setEditFormData({
@@ -107,7 +107,7 @@ export default function UsersPage() {
             displayName: user.display_name || '',
             email: user.email || '',
             password: '',
-        });
+        , changePasswordNextLogon: false });
         setEditingUser(user);
     };
 
@@ -121,6 +121,7 @@ export default function UsersPage() {
             if (editFormData.displayName) data.displayName = editFormData.displayName;
             if (editFormData.email) data.email = editFormData.email;
             if (editFormData.password) data.password = editFormData.password;
+            if (editFormData.changePasswordNextLogon) data.changePasswordNextLogon = true;
             await usersApi.update(editingUser.username, data);
             await loadUsers(true);
             setEditingUser(null);
@@ -363,6 +364,13 @@ export default function UsersPage() {
                                 <input type="password" value={editFormData.password} onChange={(e) => setEditFormData({ ...editFormData, password: e.target.value })}
                                     className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                                     placeholder="Deixe vazio para manter a senha atual" />
+                            </div>
+                            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                                <input type="checkbox" id="changePwdNext"
+                                    checked={!!editFormData.changePasswordNextLogon}
+                                    onChange={(e) => setEditFormData({ ...editFormData, changePasswordNextLogon: e.target.checked })}
+                                    className="accent-[#0ABF16]" />
+                                <label htmlFor="changePwdNext" className="text-sm text-accent cursor-pointer select-none">{t('users.changePwdNext')}</label>
                             </div>
                         </div>
                         <div className="flex gap-3 mt-6">
