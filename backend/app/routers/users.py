@@ -73,7 +73,15 @@ async def create_user(
             email=user.email or "",
             ou=user.ou or "",
         )
-        log_activity(current_user.get("username", "system"), "CREATE", "User", user.username, "Created user successfully")
+        pwd_note = ""
+        if user.change_password_next_logon is True:
+            try:
+                samba_tool.set_pwd_last_set(user.username, 0)
+                pwd_note = "; password change required at next logon"
+            except SambaToolError as pd_err:
+                pwd_note = "; WARNING: pwdLastSet failed: " + str(pd_err)
+
+        log_activity(current_user.get("username", "system"), "CREATE", "User", user.username, "Created user successfully" + pwd_note)
         return {"message": "User created successfully", "detail": result}
     except SambaToolError as e:
         raise HTTPException(status_code=400, detail=str(e))

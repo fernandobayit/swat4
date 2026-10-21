@@ -81,7 +81,8 @@
         "disableAccount": "Disable Account",
         "ouDefault": "Domain default (CN=Users)",
         "ouDefaultProfile": "Profile default (Domain Admins)",
-        "changePwdNext": "Change password at next logon"
+        "changePwdNext": "Change password at next logon",
+        "createdIn": "Will be created in the"
     },
     "groups": {
         "title": "Group Management",
