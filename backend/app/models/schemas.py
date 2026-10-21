@@ -33,6 +33,7 @@ class UserCreate(BaseModel):
     email: Optional[str] = None
     ou: Optional[str] = None  # Target OU DN
     enabled: bool = True
+    change_password_next_logon: Optional[bool] = None
 
     class Config:
         populate_by_name = True

@@ -35,7 +35,7 @@ export default function UsersPage() {
     const [search, setSearch] = useState('');
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [formData, setFormData] = useState({ username: '', password: '', givenName: '', sn: '', email: '', ou: '' });
+    const [formData, setFormData] = useState({ username: '', password: '', givenName: '', sn: '', email: '', changePasswordNextLogon: false });
     const [ouTree, setOuTree] = useState<any[]>([]);
     const [defaultCreateOu, setDefaultCreateOu] = useState('');
     const [saving, setSaving] = useState(false);
@@ -74,7 +74,7 @@ export default function UsersPage() {
             await usersApi.create(formData);
             await loadUsers(true);
             setShowCreateForm(false);
-            setFormData({ username: '', password: '', givenName: '', sn: '', email: '', ou: defaultCreateOu || '' });
+            setFormData({ username: '', password: '', givenName: '', sn: '', email: '', changePasswordNextLogon: false });
             setIsUsernameEdited(false);
         } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
         finally { setSaving(false); }
@@ -145,7 +145,7 @@ export default function UsersPage() {
                     </button>
                     <button onClick={() => {
                         setShowCreateForm(true);
-                        setFormData({ username: '', password: '', givenName: '', sn: '', email: '', ou: defaultCreateOu || '' });
+                        setFormData({ username: '', password: '', givenName: '', sn: '', email: '', changePasswordNextLogon: false });
                         setIsUsernameEdited(false);
                     }}
                         className="flex items-center gap-2 px-4 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent-light active:scale-95 transition-smooth shadow-sm">
@@ -304,22 +304,23 @@ export default function UsersPage() {
                                 <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                             </div>
-                            <div>
-                                <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.ou')}</label>
-                                <select value={formData.ou} onChange={(e) => setFormData({ ...formData, ou: e.target.value })}
-                                    className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
-                                    {defaultCreateOu
-                                        ? <option value={defaultCreateOu}>{t('users.ouDefaultProfile')}</option>
-                                        : <option value="">{t('users.ouDefault')}</option>}
-                                    {flattenOus(ouTree).map((o) => (
-                                        <option key={o.dn} value={o.dn}>{o.label}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <p className="text-[10px] text-accent/30">
+                                {defaultCreateOu
+                                    ? `${t('users.createdIn')}: ${defaultCreateOu.split(',')[0].replace(/^OU=/i, '')}`
+                                    : t('users.ouDefault')}
+                            </p>
+
                             <div>
                                 <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.password')} *</label>
                                 <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" required />
+                            </div>
+                            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                                <input type="checkbox" id="createPwdNext"
+                                    checked={!!formData.changePasswordNextLogon}
+                                    onChange={(e) => setFormData({ ...formData, changePasswordNextLogon: e.target.checked })}
+                                    className="accent-[#0ABF16]" />
+                                <label htmlFor="createPwdNext" className="text-sm text-accent cursor-pointer select-none">{t('users.changePwdNext')}</label>
                             </div>
                         </div>
                         <div className="flex gap-3 mt-6">
