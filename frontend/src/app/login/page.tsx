@@ -89,7 +89,8 @@ export default function LoginPage() {
                 <div className="bg-white rounded-3xl shadow-modal p-8 md:p-10 animate-slide-up">
                     {/* Logo/Brand */}
                     <div className="flex flex-col items-center mb-8">
-                        <img src="/saxis-2.png" alt="Saxis Logo" className="h-20 mb-2 object-contain" />
+                        <img src="/saxis-icon.png" alt="SWAT4 Logo" className="h-16 mb-2 object-contain" />
+                        <h1 className="text-2xl font-bold font-heading text-accent tracking-tight">SWAT4</h1>
                     </div>
 
                     {/* Login title */}
