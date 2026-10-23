@@ -61,7 +61,7 @@ export default function ActivityPage() {
                 <div>
                     <h1 className="text-3xl font-bold font-heading text-accent tracking-tight flex items-center gap-3">
                         <Activity className="text-primary" size={28} />
-                        {(t as any)('nav?.activity') || 'Activity Log'}
+                        {(t as any)('nav.activity') || 'Activity Log'}
                     </h1>
                     <p className="text-accent/60 mt-1">Track changes and audit operations in the SWAT4 system</p>
                 </div>
