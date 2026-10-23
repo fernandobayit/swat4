@@ -98,7 +98,7 @@ export default function Sidebar() {
                     'flex items-center justify-center flex-shrink-0',
                     collapsed ? 'w-9 h-9' : 'h-12'
                 )}>
-                    <img src="/saxis-2.png" alt="Saxis Logo" className={cn(
+                    <img src="/saxis-icon.png" alt="SWAT4 Logo" className={cn(
                         'object-contain',
                         collapsed ? 'w-full h-full' : 'h-full w-auto'
                     )} />
@@ -106,7 +106,6 @@ export default function Sidebar() {
                 {!collapsed && (
                     <div className="animate-fade-in">
                         <h1 className="text-base font-bold font-heading text-accent tracking-tight leading-none">SWAT4</h1>
-                        <p className="text-[10px] text-accent/40 font-medium tracking-wider uppercase">AD Manager</p>
                     </div>
                 )}
             </div>
