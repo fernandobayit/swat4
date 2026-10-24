@@ -82,7 +82,8 @@
         "ouDefault": "Domain default (CN=Users)",
         "ouDefaultProfile": "Profile default (Domain Admins)",
         "changePwdNext": "Change password at next logon",
-        "createdIn": "Will be created in the"
+        "createdIn": "Will be created in the",
+        "addGroups": "User groups"
     },
     "groups": {
         "title": "Group Management",
@@ -100,7 +101,8 @@
         "addMemberPlaceholder": "Type username to add...",
         "noUsersFound": "No users found",
         "noMembers": "This group has no members",
-        "removeMember": "Remove member"
+        "removeMember": "Remove member",
+        "searchPlaceholder": "Search group..."
     },
     "shares": {
         "title": "Share Management",

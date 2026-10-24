@@ -85,7 +85,8 @@
         "ouDefault": "Padrão do domínio (CN=Users)",
         "ouDefaultProfile": "Padrão do perfil (Domain Admins)",
         "changePwdNext": "Alterar senha no próximo logon",
-        "createdIn": "Será criado dentro da"
+        "createdIn": "Será criado dentro da",
+        "addGroups": "Grupos do usuário"
     },
     "groups": {
         "title": "Gerenciamento de Grupos",
@@ -103,7 +104,8 @@
         "addMemberPlaceholder": "Digitar nome do usuário para adicionar...",
         "noUsersFound": "Nenhum usuário encontrado",
         "noMembers": "Este grupo não possui membros",
-        "removeMember": "Remover membro"
+        "removeMember": "Remover membro",
+        "searchPlaceholder": "Buscar grupo..."
     },
     "shares": {
         "title": "Gerenciamento de Compartilhamentos",

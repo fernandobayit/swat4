@@ -3,7 +3,7 @@ import ldap
 from app.auth.rbac import require_role
 from app.auth.ldap_auth import get_admin_connection
 from app.config import settings
-from app.models.schemas import PasswordPolicy, PasswordPolicyUpdate
+from app.models.schemas import PasswordPolicy, PasswordPolicyUpdate, DomainInfo
 from app.database import log_activity
 
 router = APIRouter()
@@ -13,6 +13,19 @@ def _decode(val):
     if isinstance(val, list): val = val[0]
     if isinstance(val, bytes): val = val.decode()
     return int(val)
+
+@router.get("/info", response_model=DomainInfo)
+async def get_domain_info(
+    current_user: dict = Depends(require_role(["Domain Admins", "Account Operators"]))
+):
+    """Real AD identity used by the panel (dashboard AD Information)."""
+    return DomainInfo(
+        domain=settings.samba_domain,
+        realm=settings.samba_realm,
+        dc_host=settings.samba_dc_host,
+        base_dn=settings.samba_base_dn,
+    )
+
 
 @router.get("/password-policy", response_model=PasswordPolicy)
 async def get_password_policy(

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
-import { users, groups, shares } from '@/lib/api';
+import { users, groups, shares, domain as domainApi } from '@/lib/api';
 import { Users, Shield, HardDrive, Activity, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -11,10 +11,12 @@ export default function DashboardPage() {
     const { t } = useTranslation();
     const { user } = useAuth();
     const [stats, setStats] = useState({ users: 0, groups: 0, shares: 0 });
+    const [adInfo, setAdInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadStats();
+        domainApi.info().then(setAdInfo).catch(() => setAdInfo(null));
     }, []);
 
     const loadStats = async () => {
@@ -95,11 +97,11 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-surface/50 rounded-xl p-4">
                         <p className="text-[10px] uppercase tracking-wider text-accent/40 font-semibold mb-1">Domain</p>
-                        <p className="text-sm font-medium text-accent">SWAT.LOCAL</p>
+                        <p className="text-sm font-medium text-accent">{adInfo?.domain || adInfo?.realm || '—'}</p>
                     </div>
                     <div className="bg-surface/50 rounded-xl p-4">
                         <p className="text-[10px] uppercase tracking-wider text-accent/40 font-semibold mb-1">Domain Controller</p>
-                        <p className="text-sm font-medium text-accent">DC1</p>
+                        <p className="text-sm font-medium text-accent">{adInfo?.dc_host || '—'}</p>
                     </div>
                     <div className="bg-surface/50 rounded-xl p-4">
                         <p className="text-[10px] uppercase tracking-wider text-accent/40 font-semibold mb-1">Logged in as</p>

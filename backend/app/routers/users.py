@@ -80,8 +80,16 @@ async def create_user(
                 pwd_note = "; password change required at next logon"
             except SambaToolError as pd_err:
                 pwd_note = "; WARNING: pwdLastSet failed: " + str(pd_err)
+        groups_note = ""
+        for group_name in (user.groups or []):
+            try:
+                samba_tool.add_group_members(group_name, [user.username])
+                groups_note += f"; joined group {group_name}"
+                log_activity(current_user.get("username", "system"), "UPDATE", "Group", group_name, f"Added member {user.username} (user creation)")
+            except SambaToolError as gr_err:
+                groups_note += f"; WARNING: group {group_name} failed: {gr_err}"
 
-        log_activity(current_user.get("username", "system"), "CREATE", "User", user.username, "Created user successfully" + pwd_note)
+        log_activity(current_user.get("username", "system"), "CREATE", "User", user.username, "Created user successfully" + pwd_note + groups_note)
         return {"message": "User created successfully", "detail": result}
     except SambaToolError as e:
         raise HTTPException(status_code=400, detail=str(e))

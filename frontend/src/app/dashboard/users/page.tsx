@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { useToast } from '@/lib/toast';
 import { users as usersApi, bulk as bulkApi, ous as ousApi , roles as rolesApi } from '@/lib/api';
+import { groups as groupsApi } from '@/lib/api';
 import OUTree from '@/components/ou-tree';
 import { Plus, Pencil, Trash2, Search, UserCheck, UserX, X, FileUp } from 'lucide-react';
 import type { User } from '@/lib/types';
@@ -35,8 +36,11 @@ export default function UsersPage() {
     const [search, setSearch] = useState('');
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [formData, setFormData] = useState({ username: '', password: '', givenName: '', sn: '', email: '', changePasswordNextLogon: false });
+    const [formData, setFormData] = useState({ username: '', password: '', givenName: '', sn: '', changePasswordNextLogon: false });
     const [ouTree, setOuTree] = useState<any[]>([]);
+    const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+    const [allGroups, setAllGroups] = useState<any[]>([]);
+    const [groupSearch, setGroupSearch] = useState('');
     const [defaultCreateOu, setDefaultCreateOu] = useState('');
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -46,6 +50,7 @@ export default function UsersPage() {
 
     useEffect(() => {
         ousApi.tree().then((t: any[]) => setOuTree(t)).catch(() => {});
+        groupsApi.list().then((gs: any[]) => setAllGroups(gs)).catch(() => {});
         rolesApi.getSettings('Domain Admins')
             .then((st: any) => setDefaultCreateOu(st?.default_create_ou || ''))
             .catch(() => {});
@@ -71,10 +76,10 @@ export default function UsersPage() {
     const handleCreate = async () => {
         setSaving(true); setError('');
         try {
-            await usersApi.create(formData);
+            await usersApi.create({ ...formData, groups: selectedGroups });
             await loadUsers(true);
             setShowCreateForm(false);
-            setFormData({ username: '', password: '', givenName: '', sn: '', email: '', changePasswordNextLogon: false });
+            setFormData({ username: '', password: '', givenName: '', sn: '', changePasswordNextLogon: false });
             setIsUsernameEdited(false);
         } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
         finally { setSaving(false); }
@@ -102,7 +107,7 @@ export default function UsersPage() {
         } catch (e: any) { showToast({ title: t('common.error') || 'Erro', description: e.message, variant: 'error', duration: 7000 }); }
     };
 
-    const [editFormData, setEditFormData] = useState({ givenName: '', sn: '', displayName: '', email: '', password: '', changePasswordNextLogon: false });
+    const [editFormData, setEditFormData] = useState({ givenName: '', sn: '', displayName: '', password: '', changePasswordNextLogon: false });
 
     const openEditModal = (user: User) => {
         setEditFormData({
@@ -124,7 +129,6 @@ export default function UsersPage() {
             if (editFormData.givenName) data.givenName = editFormData.givenName;
             if (editFormData.sn) data.sn = editFormData.sn;
             if (editFormData.displayName) data.displayName = editFormData.displayName;
-            if (editFormData.email) data.email = editFormData.email;
             if (editFormData.password) data.password = editFormData.password;
             if (editFormData.changePasswordNextLogon) data.changePasswordNextLogon = true;
             await usersApi.update(editingUser.username, data);
@@ -145,7 +149,7 @@ export default function UsersPage() {
                     </button>
                     <button onClick={() => {
                         setShowCreateForm(true);
-                        setFormData({ username: '', password: '', givenName: '', sn: '', email: '', changePasswordNextLogon: false });
+                        setFormData({ username: '', password: '', givenName: '', sn: '', changePasswordNextLogon: false });
                         setIsUsernameEdited(false);
                     }}
                         className="flex items-center gap-2 px-4 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent-light active:scale-95 transition-smooth shadow-sm">
@@ -299,17 +303,36 @@ export default function UsersPage() {
                                     }}
                                     className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" required />
                             </div>
-                            <div>
-                                <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.email')}</label>
-                                <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                            </div>
                             <p className="text-[10px] text-accent/30">
                                 {defaultCreateOu
                                     ? `${t('users.createdIn')}: ${defaultCreateOu.split(',')[0].replace(/^OU=/i, '')}`
                                     : t('users.ouDefault')}
                             </p>
 
+                            <div>
+                                <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.addGroups')}</label>
+                                <input type="text" value={groupSearch}
+                                    onChange={(e) => setGroupSearch(e.target.value)}
+                                    placeholder={t('groups.searchPlaceholder')}
+                                    className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 mb-2" />
+                                <div className="max-h-40 overflow-y-auto border border-border/30 rounded-xl divide-y divide-border/20">
+                                    {allGroups
+                                        .filter((g: any) => !groupSearch || g.name.toLowerCase().includes(groupSearch.toLowerCase()))
+                                        .map((g: any) => (
+                                            <label key={g.name} className="flex items-center justify-between px-3 py-2 hover:bg-surface/40 cursor-pointer">
+                                                <span className="text-sm text-accent">{g.name}</span>
+                                                <input type="checkbox" className="accent-[#0ABF16]"
+                                                    checked={selectedGroups.includes(g.name)}
+                                                    onChange={(e) => setSelectedGroups(e.target.checked
+                                                        ? [...selectedGroups, g.name]
+                                                        : selectedGroups.filter((x: string) => x !== g.name))} />
+                                            </label>
+                                        ))}
+                                </div>
+                                {selectedGroups.length > 0 && (
+                                    <p className="text-[10px] text-accent/40 mt-1">{selectedGroups.join(', ')}</p>
+                                )}
+                            </div>
                             <div>
                                 <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.password')} *</label>
                                 <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -360,11 +383,6 @@ export default function UsersPage() {
                             <div>
                                 <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.displayName')}</label>
                                 <input value={editFormData.displayName} onChange={(e) => setEditFormData({ ...editFormData, displayName: e.target.value })}
-                                    className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-accent/60 mb-1">{t('users.email')}</label>
-                                <input type="email" value={editFormData.email} onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
                                     className="w-full px-3 py-2.5 border border-border/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                             </div>
                             <div>
