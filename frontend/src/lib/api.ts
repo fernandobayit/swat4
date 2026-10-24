@@ -175,6 +175,7 @@ export const activities = {
 
 // ── Domain ───────────────────────────────────────
 export const domain = {
+    info: () => apiRequest<any>('/domain/info'),
     getPasswordPolicy: () =>
         apiRequest<any>('/domain/password-policy'),
     updatePasswordPolicy: (data: any) =>

@@ -33,6 +33,7 @@ class UserCreate(BaseModel):
     email: Optional[str] = None
     ou: Optional[str] = None  # Target OU DN
     enabled: bool = True
+    groups: List[str] = []  # Grupos AD para ingressar apos criar
     change_password_next_logon: Optional[bool] = None
 
     class Config:
@@ -224,6 +225,13 @@ class PasswordPolicyUpdate(BaseModel):
     reset_lockout_after_mins: Optional[int] = None
 
 # ── Roles ─────────────────────────────────────────────
+class DomainInfo(BaseModel):
+    domain: str          # NetBIOS short name
+    realm: str           # Kerberos realm (ex: SWAT.LOCAL)
+    dc_host: str         # Configured DC host
+    base_dn: str         # LDAP base DN
+
+
 class RoleSettingsSchema(BaseModel):
     visible_groups_regex: str = "^.*$"
     visible_groups_list: List[str] = []
