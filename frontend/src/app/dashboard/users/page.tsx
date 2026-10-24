@@ -114,7 +114,6 @@ export default function UsersPage() {
             givenName: user.given_name || '',
             sn: user.surname || '',
             displayName: user.display_name || '',
-            email: user.email || '',
             password: '',
             changePasswordNextLogon: false,
         });
