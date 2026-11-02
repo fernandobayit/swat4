@@ -171,6 +171,41 @@ def delete_share(name: str) -> None:
     _reload_samba()
 
 
+def _smb_exec(share: str, command: str) -> None:
+    """Executa comando smbclient no compartilhamento (mkdir/rmdir via SMB)."""
+    import subprocess
+    from app.config import settings
+
+    cmd = [
+        "smbclient", f"//{settings.samba_dc_host}/{share}",
+        "-U", f"{settings.samba_admin_user}%{settings.samba_admin_password}",
+        "-c", command,
+    ]
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+        if res.returncode != 0:
+            raise RuntimeError(f"smbclient failed ({share}): {res.stderr} {res.stdout}")
+    except Exception as e:
+        if isinstance(e, RuntimeError):
+            raise
+        raise RuntimeError(f"smbclient exception ({share}): {e}")
+
+
+def _create_folder_smb(share: str, folder: str) -> None:
+    """Cria pasta fisica no servidor SMB (o smbd que exporta o share)."""
+    _smb_exec(share, f'mkdir "\\{folder}"')
+
+
+def _delete_folder_smb(share: str, folder: str) -> None:
+    """Remove pasta fisica no servidor SMB (inclui conteudo via del/rec)."""
+    try:
+        _smb_exec(share, f'del "\\{folder}\\*"')
+        _smb_exec(share, f'rmdir "\\{folder}"')
+    except Exception:
+        logger.warning(f"SMB delete of {share}/{folder} failed; falling back to filesystem")
+        import shutil
+    
+
 def _apply_sddl(share: str, relative_path: str, sddl: str) -> None:
     """Aplica SDDL via smbcacls em um caminho relativo de um compartilhamento."""
     import subprocess
@@ -194,6 +229,9 @@ def _delete_folder_artifacts(share: str, folder: str) -> None:
     """Apaga grupos e pasta fisica de uma subpasta (sem tocar o registro)."""
     import shutil
     from app.services.samba_tool import delete_group
+
+    # Pasta fisica: SMB-first (o smbd que exporta o share); fallback local
+    _delete_folder_smb(share, folder)
 
     for group in (f"Acesso Escrita {folder}", f"Acesso Leitura {folder}"):
         try:
@@ -243,9 +281,9 @@ def add_share_folder(share: str, folder: str, created_by: str) -> None:
         except Exception as e:
             logger.warning(f"Failed to create group {group}, might exist: {e}")
 
-    # Pasta fisica
-    folder_path = f"/mnt/data/{share}/{folder}"
-    os.makedirs(folder_path, exist_ok=True)
+    # Pasta fisica no servidor SMB (o smbd que exporta o share)
+    _create_folder_smb(share, folder)
+    os.makedirs(f"/mnt/data/{share}/{folder}", exist_ok=True)  # best effort local (mesmo volume)
 
     # Reconhecer nova pasta/grupos no smbd antes de aplicar ACL
     _reload_samba()
