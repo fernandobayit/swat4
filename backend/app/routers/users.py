@@ -71,7 +71,7 @@ async def create_user(
             given_name=user.given_name or "",
             surname=user.surname or "",
             email=user.email or "",
-            ou=user.ou or "",
+            ou=parent_dn,
         )
         pwd_note = ""
         if user.change_password_next_logon is True:
@@ -89,7 +89,7 @@ async def create_user(
             except SambaToolError as gr_err:
                 groups_note += f"; WARNING: group {group_name} failed: {gr_err}"
 
-        log_activity(current_user.get("username", "system"), "CREATE", "User", user.username, "Created user successfully" + pwd_note + groups_note)
+        log_activity(current_user.get("username", "system"), "CREATE", "User", user.username, "Created user successfully in " + parent_dn + pwd_note + groups_note)
         return {"message": "User created successfully", "detail": result}
     except SambaToolError as e:
         raise HTTPException(status_code=400, detail=str(e))
