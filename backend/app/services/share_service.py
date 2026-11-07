@@ -197,13 +197,19 @@ def _create_folder_smb(share: str, folder: str) -> None:
 
 
 def _delete_folder_smb(share: str, folder: str) -> None:
-    """Remove pasta fisica no servidor SMB (inclui conteudo via del/rec)."""
+    """Remove pasta fisica no servidor SMB (deltree recursivo; fallback local)."""
+    import shutil
     try:
-        _smb_exec(share, f'del "\\{folder}\\*"')
-        _smb_exec(share, f'rmdir "\\{folder}"')
-    except Exception:
-        logger.warning(f"SMB delete of {share}/{folder} failed; falling back to filesystem")
-        import shutil
+        _smb_exec(share, f'deltree "\\{folder}"')
+        return
+    except Exception as del_err:
+        logger.warning(f"SMB deltree of {share}/{folder} failed: {del_err}; trying local fallback")
+    local_path = f"/mnt/data/{share}/{folder}"
+    if os.path.isdir(local_path):
+        shutil.rmtree(local_path, ignore_errors=True)
+        logger.info(f"Local fallback removed {local_path}")
+    else:
+        logger.error(f"Folder {share}/{folder} not deleted: not found on SMB nor local volume")
     
 
 def _apply_sddl(share: str, relative_path: str, sddl: str) -> None:
@@ -310,7 +316,7 @@ def delete_share_folder(share: str, folder: str) -> None:
 
     existing = [r["folder"] for r in list_share_folders(share)]
     if folder not in existing:
-        raise ValueError(f"Folder '{folder}' not found in share '{share}'")
+        logger.info(f"Folder '{folder}' not registered in share '{share}'; cleaning up anyway (orphan)")
 
     _delete_folder_artifacts(share, folder)
     delete_share_folder_row(share, folder)
